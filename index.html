@@ -222,7 +222,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎮 TFT Profiles</h1>
+        <h1>🎮</h1>
         
         <div class="controls">
             <button class="refresh-btn" id="refreshBtn" onclick="loadAllProfiles()">Refresh All Profiles</button>
@@ -230,28 +230,6 @@
 
         <div class="loading" id="loading">Loading profiles...</div>
         <div class="error" id="error"></div>
-
-        <div class="stats-summary" id="statsSummary" style="display: none;">
-            <h2>Summary Statistics</h2>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-label">Total Profiles</div>
-                    <div class="stat-value" id="totalProfiles">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Average Rating</div>
-                    <div class="stat-value" id="avgRating">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Highest Rank</div>
-                    <div class="stat-value" id="highestRank">-</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Total Games</div>
-                    <div class="stat-value" id="totalGames">0</div>
-                </div>
-            </div>
-        </div>
         
         <div class="profiles-grid" id="profilesGrid"></div>
     </div>
@@ -265,19 +243,35 @@
                 gameName: 'M%E1%BA%ADp%20M%C4%83m%20M%C4%83m', // Mập Măm Măm
                 tagLine: 'Pici0',
                 displayName: 'Mập Măm Măm#Pici0'
+            },
+            {
+                region: 'VN2',
+                gameName: 'Guen%20Mori', // Guen Mori
+                tagLine: 'vn2',
+                displayName: 'Guen Mori#vn2'
+            },
+            {
+                region: 'VN2',
+                gameName: 'Halcyon',
+                tagLine: '1621',
+                displayName: 'Halcyon#1621'
+            },
+            {
+                region: 'VN2',
+                gameName: 'Yuki%20Apollo', // Yuki Apollo
+                tagLine: 'vn2',
+                displayName: 'Yuki Apollo#vn2'
+            },
+            {
+                region: 'VN2',
+                gameName: 'Musashi%20Shao', // Musashi Shao
+                tagLine: 'shao',
+                displayName: 'Musashi Shao#shao'
             }
-            // Add more IGNs here as needed
-            // Example:
-            // {
-            //     region: 'VN2',
-            //     gameName: 'AnotherPlayer',
-            //     tagLine: 'Tag123',
-            //     displayName: 'AnotherPlayer#Tag123'
-            // }
         ];
 
         function buildApiUrl(ign) {
-            return `https://api.metatft.com/public/profile/refresh_by_riotid/${ign.region}/${ign.gameName}/${ign.tagLine}`;
+            return `https://api.metatft.com/public/profile/lookup_by_riotid/${ign.region}/${ign.gameName}/${ign.tagLine}?source=full_profile&tft_set=TFTSet16`;
         }
 
         async function fetchProfile(ign) {
