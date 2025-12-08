@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFT Profiles - IGN & Rank List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .refresh-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #e53e3e;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-card.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .profile-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .ign {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 15px;
+            word-break: break-word;
+            text-align: center;
+        }
+
+        .rank-section {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .rank-label {
+            font-size: 0.8rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .rank-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a202c;
+            margin-bottom: 15px;
+        }
+
+        .rank-details {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .stats-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .stats-summary h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 TFT Profiles</h1>
+        
+        <div class="controls">
+            <button class="refresh-btn" id="refreshBtn" onclick="loadAllProfiles()">Refresh All Profiles</button>
+        </div>
+
+        <div class="loading" id="loading">Loading profiles...</div>
+        <div class="error" id="error"></div>
+
+        <div class="stats-summary" id="statsSummary" style="display: none;">
+            <h2>Summary Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Total Profiles</div>
+                    <div class="stat-value" id="totalProfiles">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Average Rating</div>
+                    <div class="stat-value" id="avgRating">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Highest Rank</div>
+                    <div class="stat-value" id="highestRank">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Games</div>
+                    <div class="stat-value" id="totalGames">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="profiles-grid" id="profilesGrid"></div>
+    </div>
+
+    <script>
+        // Hardcoded list of IGNs
+        // Format: { region, gameName, tagLine, displayName }
+        const IGN_LIST = [
+            {
+                region: 'VN2',
+                gameName: 'M%E1%BA%ADp%20M%C4%83m%20M%C4%83m', // Mập Măm Măm
+                tagLine: 'Pici0',
+                displayName: 'Mập Măm Măm#Pici0'
+            }
+            // Add more IGNs here as needed
+            // Example:
+            // {
+            //     region: 'VN2',
+            //     gameName: 'AnotherPlayer',
+            //     tagLine: 'Tag123',
+            //     displayName: 'AnotherPlayer#Tag123'
+            // }
+        ];
+
+        function buildApiUrl(ign) {
+            return `https://api.metatft.com/public/profile/refresh_by_riotid/${ign.region}/${ign.gameName}/${ign.tagLine}`;
+        }
+
+        async function fetchProfile(ign) {
+            const apiUrl = buildApiUrl(ign);
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return { success: true, data, ign };
+            } catch (error) {
+                return { success: false, error: error.message, ign };
+            }
+        }
+
+        function createProfileCard(profileData) {
+            const { data, ign } = profileData;
+            const card = document.createElement('div');
+            card.className = 'profile-card';
+            
+            const ignText = data.summoner?.riot_id || ign.displayName || 'N/A';
+            const rankText = data.ranked?.rating_text || 'N/A';
+            const numGames = data.ranked?.num_games || 0;
+            const ratingNumeric = data.ranked?.rating_numeric || 0;
+            const peakRating = data.ranked?.peak_rating || 'N/A';
+
+            card.innerHTML = `
+                <div class="profile-icon">👤</div>
+                <div class="ign">${ignText}</div>
+                <div class="rank-section">
+                    <div class="rank-label">Current Rank</div>
+                    <div class="rank-value">${rankText}</div>
+                </div>
+                <div class="rank-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Games</div>
+                        <div class="detail-value">${numGames}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Rating</div>
+                        <div class="detail-value">${ratingNumeric}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Peak</div>
+                        <div class="detail-value">${peakRating}</div>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function createErrorCard(ign, error) {
+            const card = document.createElement('div');
+            card.className = 'profile-card';
+            card.innerHTML = `
+                <div class="profile-icon">❌</div>
+                <div class="ign">${ign.displayName}</div>
+                <div class="rank-section">
+                    <div class="rank-label">Error</div>
+                    <div class="rank-value" style="color: #e53e3e; font-size: 1rem;">${error}</div>
+                </div>
+            `;
+            return card;
+        }
+
+        function calculateStats(profiles) {
+            const successful = profiles.filter(p => p.success && p.data);
+            const total = successful.length;
+            
+            if (total === 0) {
+                return {
+                    totalProfiles: IGN_LIST.length,
+                    avgRating: 0,
+                    highestRank: '-',
+                    totalGames: 0
+                };
+            }
+
+            const ratings = successful
+                .map(p => p.data.ranked?.rating_numeric)
+                .filter(r => r !== undefined && r !== null);
+            
+            const avgRating = ratings.length > 0 
+                ? Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length)
+                : 0;
+
+            const highestRating = Math.max(...ratings, 0);
+            const highestProfile = successful.find(p => 
+                p.data.ranked?.rating_numeric === highestRating
+            );
+            const highestRank = highestProfile?.data.ranked?.rating_text || '-';
+
+            const totalGames = successful.reduce((sum, p) => 
+                sum + (p.data.ranked?.num_games || 0), 0
+            );
+
+            return {
+                totalProfiles: IGN_LIST.length,
+                avgRating,
+                highestRank,
+                totalGames
+            };
+        }
+
+        function updateStats(profiles) {
+            const stats = calculateStats(profiles);
+            document.getElementById('totalProfiles').textContent = stats.totalProfiles;
+            document.getElementById('avgRating').textContent = stats.avgRating;
+            document.getElementById('highestRank').textContent = stats.highestRank;
+            document.getElementById('totalGames').textContent = stats.totalGames;
+            document.getElementById('statsSummary').style.display = 'block';
+        }
+
+        async function loadAllProfiles() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const profilesGrid = document.getElementById('profilesGrid');
+            const refreshBtn = document.getElementById('refreshBtn');
+
+            // Show loading state
+            loading.classList.add('active');
+            error.classList.remove('active');
+            profilesGrid.innerHTML = '';
+            refreshBtn.disabled = true;
+
+            try {
+                // Fetch all profiles in parallel
+                const profilePromises = IGN_LIST.map(ign => fetchProfile(ign));
+                const results = await Promise.all(profilePromises);
+
+                // Clear grid and add cards
+                profilesGrid.innerHTML = '';
+
+                results.forEach(result => {
+                    let card;
+                    if (result.success) {
+                        card = createProfileCard(result);
+                    } else {
+                        card = createErrorCard(result.ign, result.error);
+                    }
+                    profilesGrid.appendChild(card);
+                });
+
+                // Update stats
+                updateStats(results);
+
+                loading.classList.remove('active');
+
+            } catch (err) {
+                console.error('Error loading profiles:', err);
+                error.textContent = `Error: ${err.message}`;
+                error.classList.add('active');
+                loading.classList.remove('active');
+            } finally {
+                refreshBtn.disabled = false;
+            }
+        }
+
+        // Load profiles on page load
+        window.addEventListener('DOMContentLoaded', loadAllProfiles);
+    </script>
+</body>
+</html>
