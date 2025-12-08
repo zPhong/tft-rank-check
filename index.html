@@ -197,61 +197,57 @@
         }
 
         .games-list {
-            max-height: 300px;
-            overflow-y: auto;
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 8px;
+            padding: 10px 0;
         }
 
         .game-item {
-            background: #f7fafc;
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            transition: background 0.2s;
-        }
-
-        .game-item:hover {
-            background: #edf2f7;
+            display: inline-flex;
+            margin: 4px;
         }
 
         .game-info {
             display: flex;
             flex-direction: column;
-            flex: 1;
+            align-items: center;
         }
 
-        .game-rating {
-            font-weight: 600;
-            color: #2d3748;
+        .placement-block {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .game-rating.positive {
-            color: #38a169;
+        .placement-block.green {
+            background: #38a169;
         }
 
-        .game-rating.negative {
-            color: #e53e3e;
+        .placement-block.yellow {
+            background: #d69e2e;
         }
 
-        .game-rating.neutral {
-            color: #718096;
+        .placement-block.orange {
+            background: #dd6b20;
+        }
+
+        .placement-block.red {
+            background: #e53e3e;
         }
 
         .game-meta {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #718096;
             margin-top: 4px;
-        }
-
-        .game-lp {
-            font-weight: 600;
-            color: #667eea;
-            margin-left: 10px;
         }
 
         .stats-summary {
@@ -354,14 +350,6 @@
             return `https://api.metatft.com/public/profile/lookup_by_riotid/${ign.region}/${ign.gameName}/${ign.tagLine}?source=full_profile&tft_set=TFTSet16`;
         }
 
-        function getPlacementSuffix(placement) {
-            if (typeof placement !== 'number') return '';
-            if (placement === 1) return 'st';
-            if (placement === 2) return 'nd';
-            if (placement === 3) return 'rd';
-            return 'th';
-        }
-
         async function fetchProfile(ign) {
             const apiUrl = buildApiUrl(ign);
             try {
@@ -397,18 +385,26 @@
                         <div class="games-history-title">Last 10 Games</div>
                         <div class="games-list">
                             ${last10Matches.map((match) => {
-                                const placement = match.placement || 'N/A';
-                                const placementClass = typeof placement === 'number' && placement <= 4 ? 'positive' : 'negative';
-                                const date = match.game_datetime ? new Date(match.game_datetime) : null;
-                                const dateStr = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+                                const placement = match.placement;
+                                if (typeof placement !== 'number') return '';
+                                
+                                let placementColor = 'red';
+                                if (placement <= 2) {
+                                    placementColor = 'green';
+                                } else if (placement <= 4) {
+                                    placementColor = 'yellow';
+                                } else if (placement <= 6) {
+                                    placementColor = 'orange';
+                                } else {
+                                    placementColor = 'red';
+                                }
                                 
                                 return `
                                     <div class="game-item">
                                         <div class="game-info">
-                                            <div class="game-rating ${placementClass}">
-                                                ${placement}${getPlacementSuffix(placement)}
+                                            <div class="placement-block ${placementColor}">
+                                                ${placement}
                                             </div>
-                                            ${dateStr ? `<div class="game-meta">${dateStr}</div>` : ''}
                                         </div>
                                     </div>
                                 `;
@@ -509,11 +505,17 @@
 
         function updateStats(profiles) {
             const stats = calculateStats(profiles);
-            document.getElementById('totalProfiles').textContent = stats.totalProfiles;
-            document.getElementById('avgRating').textContent = stats.avgRating;
-            document.getElementById('highestRank').textContent = stats.highestRank;
-            document.getElementById('totalGames').textContent = stats.totalGames;
-            document.getElementById('statsSummary').style.display = 'block';
+            const totalProfilesEl = document.getElementById('totalProfiles');
+            const avgRatingEl = document.getElementById('avgRating');
+            const highestRankEl = document.getElementById('highestRank');
+            const totalGamesEl = document.getElementById('totalGames');
+            const statsSummaryEl = document.getElementById('statsSummary');
+            
+            if (totalProfilesEl) totalProfilesEl.textContent = stats.totalProfiles;
+            if (avgRatingEl) avgRatingEl.textContent = stats.avgRating;
+            if (highestRankEl) highestRankEl.textContent = stats.highestRank;
+            if (totalGamesEl) totalGamesEl.textContent = stats.totalGames;
+            if (statsSummaryEl) statsSummaryEl.style.display = 'block';
         }
 
         async function loadAllProfiles() {
