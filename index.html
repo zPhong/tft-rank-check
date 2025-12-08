@@ -1136,37 +1136,106 @@
                 wins: matches.filter(m => m.placement === 1).length,
                 avg: (matches.reduce((a, m) => a + m.placement, 0) / matches.length).toFixed(2)
             };
-            const matchData = matches.map((m, i) => ({
-                game: i + 1, placement: m.placement,
-                round: m.summary?.last_round, level: m.summary?.level,
-                units: m.summary?.units?.map(u => ({ name: u.character_id.replace('TFT16_', ''), tier: u.tier, items: u.itemNames?.map(x => x.replace('TFT_Item_', '').replace('TFT16_Item_', '')) })),
-                traits: m.summary?.traits?.map(t => t.replace('TFT16_', '').split('_')[0])
-            }));
-            return `Bạn là chuyên gia TFT Challenger, coach có nhiều năm kinh nghiệm.
+            
+            // Phân tích chi tiết từng trận với các giai đoạn
+            const matchData = matches.map((m, i) => {
+                const units = m.summary?.units?.map(u => ({ 
+                    name: u.character_id.replace('TFT16_', ''), 
+                    tier: u.tier, 
+                    items: u.itemNames?.map(x => x.replace('TFT_Item_', '').replace('TFT16_Item_', '')) || []
+                })) || [];
+                
+                // Xác định core champions (thường là tier 3-5 hoặc có items)
+                const coreChamps = units.filter(u => u.tier >= 3 || (u.items && u.items.length >= 2));
+                const itemHolders = units.filter(u => u.items && u.items.length > 0);
+                
+                // Phân tích giai đoạn early game (champ khởi đầu)
+                const earlyChamps = units.filter(u => u.tier <= 2);
+                const earlyTraits = m.summary?.traits?.filter(t => t.includes('TFT16_'))?.map(t => t.replace('TFT16_', '').split('_')[0]) || [];
+                
+                return {
+                    game: i + 1, 
+                    placement: m.placement,
+                    round: m.summary?.last_round, 
+                    level: m.summary?.level,
+                    // Giai đoạn chọn lõi
+                    core_selection: {
+                        core_champions: coreChamps.map(c => ({ name: c.name, tier: c.tier, items: c.items })),
+                        item_distribution: itemHolders.map(h => ({ champ: h.name, items: h.items })),
+                        core_traits: m.summary?.traits?.map(t => t.replace('TFT16_', '').split('_')[0]) || []
+                    },
+                    // Giai đoạn chốt đội hình
+                    final_comp: {
+                        all_units: units.map(u => ({ name: u.name, tier: u.tier, items: u.items })),
+                        final_traits: earlyTraits,
+                        level: m.summary?.level
+                    },
+                    // Champ khởi đầu (early game)
+                    early_game: {
+                        starting_champs: earlyChamps.map(c => ({ name: c.name, tier: c.tier })),
+                        early_traits: earlyTraits.slice(0, 3), // 3 traits đầu tiên
+                        transition: coreChamps.length > 0 ? 'Có pivot' : 'Giữ nguyên'
+                    }
+                };
+            });
+            
+            return `Bạn là chuyên gia TFT Challenger, coach có nhiều năm kinh nghiệm phân tích gameplay sâu.
 
-## THUẬT NGỮ: Econ, Slow roll, Fast 8, Pivot, Cap board, Spike, BIS, Item holder
+## THUẬT NGỮ: Econ, Slow roll, Fast 8, Pivot, Cap board, Spike, BIS, Item holder, Core selection, Transition, Itemization
 
 ## PLAYER: ${data.summoner?.riot_id || currentPlayer} (${data.ranked?.rating_text}) - ${data.ranked?.num_games} games
 
 ## STATS (${stats.count} games): Top4: ${((stats.top4 / stats.count) * 100).toFixed(1)}%, Avg: ${stats.avg}, Wins: ${stats.wins}
 
-## MATCHES:\n${JSON.stringify(matchData, null, 2)}
+## MATCHES (với phân tích giai đoạn chi tiết):\n${JSON.stringify(matchData, null, 2)}
 
-## PHÂN TÍCH (giữ nguyên tên champion, item, trait gốc):
+## PHÂN TÍCH CHUYÊN SÂU (giữ nguyên tên champion, item, trait gốc):
 
-## 📊 OVERVIEW\n[Playstyle]
+## 📊 OVERVIEW\n[Phân tích playstyle tổng thể, điểm mạnh/yếu]
 
-## 🔍 BOT 4 ANALYSIS\n[Vấn đề từng trận 5-8]
+## 🎯 GIAI ĐOẠN CHỌN LÕI (CORE SELECTION)
+Phân tích từng trận:
+- **Core champions được chọn**: Đánh giá việc chọn lõi có phù hợp với meta không? Có pivot đúng lúc?
+- **Item distribution**: Items được gán cho ai? Có BIS không? Item holder có hiệu quả?
+- **Timing**: Chọn lõi ở round nào? Có quá sớm/muộn?
+- **Vấn đề**: Trận nào chọn sai lõi dẫn đến bot 4? Tại sao?
 
-## ❌ SAI LẦM CHÍNH\n1. [Cụ thể từ data]\n2. [Khác]
+## 🏁 GIAI ĐOẠN CHỐT ĐỘI HÌNH (FINAL COMP)
+Phân tích từng trận:
+- **Champ khởi đầu → Final comp**: Quá trình transition như thế nào?
+- **Starting champions**: Champ khởi đầu có phù hợp để build lên comp cuối không?
+- **Transition quality**: Pivot mượt mà hay gượng ép? Có giữ được econ không?
+- **Final board strength**: Đội hình cuối có đủ mạnh không? Thiếu gì?
+
+## 🔍 BOT 4 ANALYSIS (Phân tích sâu từng trận 5-8)
+Với mỗi trận bot 4, chỉ ra:
+1. **Giai đoạn chọn lõi**: Sai lầm gì? Chọn lõi sai? Items sai?
+2. **Giai đoạn chốt đội hình**: Transition thế nào? Champ khởi đầu có vấn đề?
+3. **Timing issues**: Econ, leveling, rolling có đúng không?
+
+## ❌ SAI LẦM CHÍNH (Từ data cụ thể)
+1. **[Cụ thể về core selection]** - Dẫn chứng từ matches
+2. **[Cụ thể về final comp/transition]** - Dẫn chứng từ matches  
+3. **[Cụ thể về champ khởi đầu]** - Dẫn chứng từ matches
+4. **[Khác]**
 
 ## ✅ ĐIỂM MẠNH
+- Core selection tốt ở trận nào?
+- Transition mượt ở trận nào?
+- Champ khởi đầu hợp lý ở trận nào?
 
-## 📚 KEY TAKEAWAYS\n[Tips actionable]
+## 📚 KEY TAKEAWAYS (Tips actionable)
+- Cách cải thiện core selection
+- Cách transition tốt hơn từ champ khởi đầu
+- Itemization tips
+- Timing và econ management
 
-## 🎯 ROADMAP\n- Target rank\n- Focus
+## 🎯 ROADMAP
+- Target rank
+- Focus areas (ưu tiên cải thiện gì trước)
 
-## 💡 COMP RECOMMENDATIONS`;
+## 💡 COMP RECOMMENDATIONS
+Dựa trên playstyle và điểm mạnh/yếu, recommend comps phù hợp`;
         }
 
         async function callAPI(prompt, model) {
