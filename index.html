@@ -1142,6 +1142,7 @@
                 const units = m.summary?.units?.map(u => ({ 
                     name: u.character_id.replace('TFT16_', ''), 
                     tier: u.tier, 
+                    star_level: u.tier === 1 ? (u.rarity >= 3 ? 3 : u.rarity >= 2 ? 2 : 1) : 1, // Estimate star level
                     items: u.itemNames?.map(x => x.replace('TFT_Item_', '').replace('TFT16_Item_', '')) || []
                 })) || [];
                 
@@ -1149,39 +1150,88 @@
                 const coreChamps = units.filter(u => u.tier >= 3 || (u.items && u.items.length >= 2));
                 const itemHolders = units.filter(u => u.items && u.items.length > 0);
                 
-                // Phân tích giai đoạn early game (champ khởi đầu)
+                // Phân tích upgrades (2-star, 3-star)
+                const upgradedChamps = units.filter(u => {
+                    // Champions có nhiều items thường được upgrade
+                    return (u.items && u.items.length >= 2) || u.tier >= 3;
+                });
+                
+                // Phân tích giai đoạn early game (champ khởi đầu) - Opener analysis
                 const earlyChamps = units.filter(u => u.tier <= 2);
                 const earlyTraits = m.summary?.traits?.filter(t => t.includes('TFT16_'))?.map(t => t.replace('TFT16_', '').split('_')[0]) || [];
+                
+                // Xác định opener type dựa trên early traits và champs
+                let openerType = 'Unknown';
+                if (earlyTraits.includes('Bilgewater') || earlyChamps.some(c => ['Illaoi', 'Graves', 'Twisted Fate', 'Gangplank'].includes(c.name))) {
+                    openerType = 'Bilgewater Opener';
+                } else if (earlyTraits.includes('Ionia') || earlyChamps.some(c => ['Briar', 'Jhin', 'Shen', 'Yasuo'].includes(c.name))) {
+                    openerType = 'Ionia Opener';
+                } else if (earlyTraits.includes('Demacia') || earlyChamps.some(c => ['Jarvan IV', 'Lulu', 'Sona', 'Neeko'].includes(c.name))) {
+                    openerType = 'Demacia Opener';
+                } else if (earlyTraits.includes('Noxus') || earlyChamps.some(c => ['Briar', 'Qiyana', 'Cho\'Gath', 'Sion'].includes(c.name))) {
+                    openerType = 'Noxus Opener';
+                } else if (earlyTraits.includes('Freljord') || earlyChamps.some(c => ['Anivia', 'Ashe', 'Sejuani'].includes(c.name))) {
+                    openerType = 'Freljord Opener';
+                } else if (earlyTraits.includes('Shadow Isles') || earlyChamps.some(c => ['Viego', 'Yorick'].includes(c.name))) {
+                    openerType = 'Shadow Isles Opener';
+                }
+                
+                // Phân tích upgrade path và timing
+                const upgradeAnalysis = {
+                    upgraded_core: upgradedChamps.map(c => ({ 
+                        name: c.name, 
+                        tier: c.tier, 
+                        items: c.items,
+                        upgrade_priority: c.items && c.items.length >= 2 ? 'High' : 'Medium'
+                    })),
+                    potential_3_stars: units.filter(u => u.tier <= 2 && u.items && u.items.length > 0).map(c => c.name),
+                    upgrade_timing: m.summary?.level <= 7 ? 'Early upgrade' : m.summary?.level <= 8 ? 'Mid upgrade' : 'Late upgrade'
+                };
                 
                 return {
                     game: i + 1, 
                     placement: m.placement,
                     round: m.summary?.last_round, 
                     level: m.summary?.level,
-                    // Giai đoạn chọn lõi
+                    // Opener và champ khởi đầu
+                    opener: {
+                        type: openerType,
+                        starting_champs: earlyChamps.map(c => ({ name: c.name, tier: c.tier })),
+                        early_traits: earlyTraits.slice(0, 4),
+                        meta_alignment: openerType !== 'Unknown' ? 'Có opener rõ ràng' : 'Opener không rõ'
+                    },
+                    // Giai đoạn chọn lõi và nâng cấp
                     core_selection: {
                         core_champions: coreChamps.map(c => ({ name: c.name, tier: c.tier, items: c.items })),
                         item_distribution: itemHolders.map(h => ({ champ: h.name, items: h.items })),
-                        core_traits: m.summary?.traits?.map(t => t.replace('TFT16_', '').split('_')[0]) || []
+                        core_traits: m.summary?.traits?.map(t => t.replace('TFT16_', '').split('_')[0]) || [],
+                        upgrade_path: upgradeAnalysis
                     },
                     // Giai đoạn chốt đội hình
                     final_comp: {
                         all_units: units.map(u => ({ name: u.name, tier: u.tier, items: u.items })),
                         final_traits: earlyTraits,
-                        level: m.summary?.level
+                        level: m.summary?.level,
+                        comp_strength: coreChamps.length >= 3 ? 'Strong' : coreChamps.length >= 2 ? 'Medium' : 'Weak'
                     },
-                    // Champ khởi đầu (early game)
-                    early_game: {
-                        starting_champs: earlyChamps.map(c => ({ name: c.name, tier: c.tier })),
-                        early_traits: earlyTraits.slice(0, 3), // 3 traits đầu tiên
-                        transition: coreChamps.length > 0 ? 'Có pivot' : 'Giữ nguyên'
+                    // Transition analysis
+                    transition: {
+                        from_opener: openerType,
+                        to_final: m.summary?.traits?.map(t => t.replace('TFT16_', '').split('_')[0]).join(', '),
+                        smoothness: coreChamps.length > 0 && openerType !== 'Unknown' ? 'Có transition' : 'Transition không rõ'
                     }
                 };
             });
             
-            return `Bạn là chuyên gia TFT Challenger, coach có nhiều năm kinh nghiệm phân tích gameplay sâu.
+            return `Bạn là chuyên gia TFT Challenger, coach có nhiều năm kinh nghiệm phân tích gameplay sâu. Tham khảo meta từ TFTFlow.com (https://tftflow.com/) cho Set 16.1.
 
-## THUẬT NGỮ: Econ, Slow roll, Fast 8, Pivot, Cap board, Spike, BIS, Item holder, Core selection, Transition, Itemization
+## THUẬT NGỮ: Econ, Slow roll, Fast 8, Fast 9, Pivot, Cap board, Spike, BIS, Item holder, Core selection, Transition, Itemization, Opener, Upgrade path
+
+## META REFERENCE (TFTFlow Set 16.1):
+- **AD Core Lines**: Bilgewater Opener, Ionia Opener, Fast 8 comps (Freljord Yunara, Bilgewater Flex, Slayers)
+- **AP Core Lines**: Demacia Opener → Fast 9 Arcanists, Noxus Opener → Fast 9 Mel Flex, Freljord/Ixtal → Fast 8
+- **Key Strategies**: Bilgewater shop upgrades, Fast 9 transitions, Fast 8 top 4 lines
+- **Opener Types**: Bilgewater (Illaoi/Graves/TF), Ionia (Briar/Jhin/Shen), Demacia (J4/Lulu/Sona), Noxus (Briar/Qiyana), Freljord (Anivia/Ashe)
 
 ## PLAYER: ${data.summoner?.riot_id || currentPlayer} (${data.ranked?.rating_text}) - ${data.ranked?.num_games} games
 
@@ -1191,51 +1241,96 @@
 
 ## PHÂN TÍCH CHUYÊN SÂU (giữ nguyên tên champion, item, trait gốc):
 
-## 📊 OVERVIEW\n[Phân tích playstyle tổng thể, điểm mạnh/yếu]
+## 📊 OVERVIEW\n[Phân tích playstyle tổng thể, điểm mạnh/yếu, so sánh với meta TFTFlow]
 
-## 🎯 GIAI ĐOẠN CHỌN LÕI (CORE SELECTION)
+## 🎮 OPENER & CHAMP KHỞI ĐẦU
 Phân tích từng trận:
-- **Core champions được chọn**: Đánh giá việc chọn lõi có phù hợp với meta không? Có pivot đúng lúc?
-- **Item distribution**: Items được gán cho ai? Có BIS không? Item holder có hiệu quả?
-- **Timing**: Chọn lõi ở round nào? Có quá sớm/muộn?
-- **Vấn đề**: Trận nào chọn sai lõi dẫn đến bot 4? Tại sao?
+- **Opener type**: Có dùng opener đúng theo meta không? (Bilgewater/Ionia/Demacia/Noxus/Freljord)
+- **Opener quality**: Opener có phù hợp với items nhận được không? (AD items → Bilgewater/Ionia, AP items → Demacia/Noxus)
+- **Starting champions**: Champ khởi đầu có đúng theo opener không? Có giữ được winstreak/econ không?
+- **Meta alignment**: So sánh với TFTFlow - opener có theo đúng meta lines không?
+
+## 🎯 GIAI ĐOẠN CHỌN LÕI & NÂNG CẤP (CORE SELECTION & UPGRADES)
+Phân tích từng trận:
+- **Core champions được chọn**: 
+  * Đánh giá việc chọn lõi có phù hợp với opener không?
+  * Có pivot đúng lúc từ opener sang core không?
+  * Core có match với meta lines từ TFTFlow không?
+  
+- **Upgrade Path & Timing**:
+  * **Upgrade priority**: Champions nào được nâng cấp? Có đúng priority không?
+  * **2-star upgrades**: Có nâng cấp đúng champs cần thiết không? Timing có đúng không?
+  * **3-star potential**: Có cố gắng 3-star champs nào không? Có nên không? (Theo TFTFlow: một số comps như Bilgewater có thể aim Nautilus 3)
+  * **Upgrade timing**: Nâng cấp ở level nào? Có quá sớm (ảnh hưởng econ) hay quá muộn (mất máu)?
+  
+- **Item distribution**: 
+  * Items được gán cho ai? Có BIS không?
+  * Item holder có hiệu quả không? Có transfer items đúng lúc không?
+  * So sánh với TFTFlow recommendations
+  
+- **Timing**: 
+  * Chọn lõi ở round/level nào? 
+  * Có quá sớm (chưa đủ econ) hay quá muộn (mất quá nhiều máu)?
+  * Fast 8 vs Fast 9: Có chọn đúng strategy không?
 
 ## 🏁 GIAI ĐOẠN CHỐT ĐỘI HÌNH (FINAL COMP)
 Phân tích từng trận:
-- **Champ khởi đầu → Final comp**: Quá trình transition như thế nào?
-- **Starting champions**: Champ khởi đầu có phù hợp để build lên comp cuối không?
-- **Transition quality**: Pivot mượt mà hay gượng ép? Có giữ được econ không?
-- **Final board strength**: Đội hình cuối có đủ mạnh không? Thiếu gì?
+- **Opener → Final comp transition**: 
+  * Quá trình transition như thế nào? Mượt mà hay gượng ép?
+  * Có giữ được econ trong quá trình transition không?
+  * Transition có theo đúng meta lines từ TFTFlow không? (VD: Bilgewater → Fast 8, Ionia → Fast 9 Lucian Kindred)
+  
+- **Starting champions → Final**: 
+  * Champ khởi đầu có phù hợp để build lên comp cuối không?
+  * Có giữ được champs từ opener không? Hay phải pivot hoàn toàn?
+  
+- **Final board strength**: 
+  * Đội hình cuối có đủ mạnh không? Thiếu gì?
+  * Có đủ upgrades không? (2-star core champs)
+  * Items có optimal không?
+  * So sánh với meta comps từ TFTFlow
 
 ## 🔍 BOT 4 ANALYSIS (Phân tích sâu từng trận 5-8)
 Với mỗi trận bot 4, chỉ ra:
-1. **Giai đoạn chọn lõi**: Sai lầm gì? Chọn lõi sai? Items sai?
-2. **Giai đoạn chốt đội hình**: Transition thế nào? Champ khởi đầu có vấn đề?
-3. **Timing issues**: Econ, leveling, rolling có đúng không?
+1. **Opener issues**: Opener sai? Không phù hợp với items? Không theo meta?
+2. **Core selection**: Chọn lõi sai? Upgrade sai priority? Timing sai?
+3. **Upgrade problems**: Nâng cấp quá sớm/muộn? Nâng cấp sai champs? Không nâng cấp đủ?
+4. **Transition issues**: Transition gượng ép? Mất econ? Pivot sai hướng?
+5. **Timing issues**: Econ, leveling, rolling có đúng không? Fast 8 vs Fast 9 decision sai?
 
 ## ❌ SAI LẦM CHÍNH (Từ data cụ thể)
-1. **[Cụ thể về core selection]** - Dẫn chứng từ matches
-2. **[Cụ thể về final comp/transition]** - Dẫn chứng từ matches  
-3. **[Cụ thể về champ khởi đầu]** - Dẫn chứng từ matches
-4. **[Khác]**
+1. **[Cụ thể về opener]** - Dẫn chứng từ matches, so sánh với TFTFlow meta
+2. **[Cụ thể về core selection & upgrades]** - Dẫn chứng từ matches
+3. **[Cụ thể về upgrade timing & priority]** - Dẫn chứng từ matches
+4. **[Cụ thể về transition]** - Dẫn chứng từ matches  
+5. **[Khác]**
 
 ## ✅ ĐIỂM MẠNH
-- Core selection tốt ở trận nào?
+- Opener tốt ở trận nào? Có theo đúng meta không?
+- Core selection & upgrades tốt ở trận nào?
 - Transition mượt ở trận nào?
-- Champ khởi đầu hợp lý ở trận nào?
+- Upgrade timing đúng ở trận nào?
 
-## 📚 KEY TAKEAWAYS (Tips actionable)
-- Cách cải thiện core selection
-- Cách transition tốt hơn từ champ khởi đầu
-- Itemization tips
-- Timing và econ management
+## 📚 KEY TAKEAWAYS (Tips actionable dựa trên TFTFlow meta)
+- **Opener selection**: Cách chọn opener phù hợp với items (AD → Bilgewater/Ionia, AP → Demacia/Noxus)
+- **Core selection**: Cách chọn lõi từ opener, khi nào pivot
+- **Upgrade strategy**: 
+  * Khi nào nên 2-star core champs
+  * Khi nào aim 3-star (VD: Nautilus 3 trong Bilgewater)
+  * Upgrade priority theo từng comp
+- **Transition tips**: Cách transition mượt từ opener → core → final comp
+- **Fast 8 vs Fast 9**: Khi nào nên Fast 8 (top 4), khi nào Fast 9 (win condition)
+- **Itemization**: BIS items theo TFTFlow recommendations
 
 ## 🎯 ROADMAP
 - Target rank
-- Focus areas (ưu tiên cải thiện gì trước)
+- Focus areas (ưu tiên cải thiện gì trước): Opener? Core selection? Upgrades? Transition?
 
-## 💡 COMP RECOMMENDATIONS
-Dựa trên playstyle và điểm mạnh/yếu, recommend comps phù hợp`;
+## 💡 COMP RECOMMENDATIONS (Dựa trên TFTFlow meta)
+Dựa trên playstyle, điểm mạnh/yếu, và items thường nhận được, recommend:
+- **AD lines**: Bilgewater Opener, Ionia Opener, Fast 8 comps
+- **AP lines**: Demacia/Noxus Opener → Fast 9, Freljord/Ixtal Fast 8
+- **Specific comps**: Recommend comps cụ thể từ TFTFlow tier list phù hợp với player`;
         }
 
         async function callAPI(prompt, model) {
