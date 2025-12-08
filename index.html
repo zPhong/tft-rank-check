@@ -354,19 +354,6 @@
             return `https://api.metatft.com/public/profile/lookup_by_riotid/${ign.region}/${ign.gameName}/${ign.tagLine}?source=full_profile&tft_set=TFTSet16`;
         }
 
-        async function fetchMatchHistory(puuid, region) {
-            try {
-                const response = await fetch(`https://api.metatft.com/public/match_history/${region}/${puuid}?count=10`);
-                if (!response.ok) {
-                    return null;
-                }
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                return null;
-            }
-        }
-
         function getPlacementSuffix(placement) {
             if (typeof placement !== 'number') return '';
             if (placement === 1) return 'st';
@@ -384,22 +371,14 @@
                 }
                 const data = await response.json();
                 
-                // Fetch match history for placement data
-                const puuid = data.summoner?.puuid;
-                const region = data.summoner?.summoner_region || ign.region;
-                let matchHistory = null;
-                if (puuid) {
-                    matchHistory = await fetchMatchHistory(puuid, region);
-                }
-                
-                return { success: true, data, matchHistory, ign };
+                return { success: true, data, ign };
             } catch (error) {
                 return { success: false, error: error.message, ign };
             }
         }
 
         function createProfileCard(profileData) {
-            const { data, matchHistory, ign } = profileData;
+            const { data, ign } = profileData;
             const card = document.createElement('div');
             card.className = 'profile-card';
             
@@ -409,17 +388,17 @@
             const ratingNumeric = data.ranked?.rating_numeric || 0;
             const peakRating = data.ranked?.peak_rating || 'N/A';
             
-            // Generate games history HTML with placement only
+            // Generate games history HTML with placement only from matches in first API
             let gamesHistoryHTML = '';
-            if (matchHistory && matchHistory.matches && matchHistory.matches.length > 0) {
-                const last10Matches = matchHistory.matches.slice(0, 10);
+            if (data.matches && data.matches.length > 0) {
+                const last10Matches = data.matches.slice(0, 10);
                 gamesHistoryHTML = `
                     <div class="games-history">
                         <div class="games-history-title">Last 10 Games</div>
                         <div class="games-list">
                             ${last10Matches.map((match) => {
-                                const placement = match.placement || match.rank || 'N/A';
-                                const placementClass = placement <= 4 ? 'positive' : 'negative';
+                                const placement = match.placement || 'N/A';
+                                const placementClass = typeof placement === 'number' && placement <= 4 ? 'positive' : 'negative';
                                 const date = match.game_datetime ? new Date(match.game_datetime) : null;
                                 const dateStr = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
                                 
