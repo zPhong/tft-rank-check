@@ -345,13 +345,34 @@
             {
                 region: 'VN2',
                 gameName: 'Nguy%E1%BB%87tTh%E1%BB%B1cAsura', // NguyệtThựcAsura
-                tagLine: '211',
-                displayName: 'NguyệtThựcAsura#211'
+                tagLine: '0211',
+                displayName: 'NguyệtThựcAsura#0211'
             }
         ];
 
         function buildApiUrl(ign) {
             return `https://api.metatft.com/public/profile/lookup_by_riotid/${ign.region}/${ign.gameName}/${ign.tagLine}?source=full_profile&tft_set=TFTSet16`;
+        }
+
+        async function fetchMatchHistory(puuid, region) {
+            try {
+                const response = await fetch(`https://api.metatft.com/public/match_history/${region}/${puuid}?count=10`);
+                if (!response.ok) {
+                    return null;
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function getPlacementSuffix(placement) {
+            if (typeof placement !== 'number') return '';
+            if (placement === 1) return 'st';
+            if (placement === 2) return 'nd';
+            if (placement === 3) return 'rd';
+            return 'th';
         }
 
         async function fetchProfile(ign) {
@@ -362,14 +383,23 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                return { success: true, data, ign };
+                
+                // Fetch match history for placement data
+                const puuid = data.summoner?.puuid;
+                const region = data.summoner?.summoner_region || ign.region;
+                let matchHistory = null;
+                if (puuid) {
+                    matchHistory = await fetchMatchHistory(puuid, region);
+                }
+                
+                return { success: true, data, matchHistory, ign };
             } catch (error) {
                 return { success: false, error: error.message, ign };
             }
         }
 
         function createProfileCard(profileData) {
-            const { data, ign } = profileData;
+            const { data, matchHistory, ign } = profileData;
             const card = document.createElement('div');
             card.className = 'profile-card';
             
@@ -379,36 +409,28 @@
             const ratingNumeric = data.ranked?.rating_numeric || 0;
             const peakRating = data.ranked?.peak_rating || 'N/A';
             
-            // Get last 10 ranked games from ranked_rating_changes
-            const ratingChanges = data.ranked_rating_changes || [];
-            const last10Games = ratingChanges.slice(0, 10);
-            
-            // Generate games history HTML
+            // Generate games history HTML with placement only
             let gamesHistoryHTML = '';
-            if (last10Games.length > 0) {
+            if (matchHistory && matchHistory.matches && matchHistory.matches.length > 0) {
+                const last10Matches = matchHistory.matches.slice(0, 10);
                 gamesHistoryHTML = `
                     <div class="games-history">
                         <div class="games-history-title">Last 10 Games</div>
                         <div class="games-list">
-                            ${last10Games.map((game, index) => {
-                                const prevGame = index < last10Games.length - 1 ? last10Games[index + 1] : null;
-                                const ratingChange = prevGame ? game.rating_numeric - prevGame.rating_numeric : 0;
-                                const ratingChangeClass = ratingChange > 0 ? 'positive' : ratingChange < 0 ? 'negative' : 'neutral';
-                                const ratingChangeText = ratingChange > 0 ? `+${ratingChange}` : ratingChange.toString();
-                                const date = new Date(game.created_timestamp);
-                                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                            ${last10Matches.map((match) => {
+                                const placement = match.placement || match.rank || 'N/A';
+                                const placementClass = placement <= 4 ? 'positive' : 'negative';
+                                const date = match.game_datetime ? new Date(match.game_datetime) : null;
+                                const dateStr = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
                                 
                                 return `
                                     <div class="game-item">
                                         <div class="game-info">
-                                            <div class="game-rating ${ratingChangeClass}">
-                                                ${game.rating_text} ${ratingChange !== 0 ? `(${ratingChangeText})` : ''}
+                                            <div class="game-rating ${placementClass}">
+                                                ${placement}${getPlacementSuffix(placement)}
                                             </div>
-                                            <div class="game-meta">
-                                                Game #${game.num_games} • ${dateStr}
-                                            </div>
+                                            ${dateStr ? `<div class="game-meta">${dateStr}</div>` : ''}
                                         </div>
-                                        <div class="game-lp">${game.rating_numeric} LP</div>
                                     </div>
                                 `;
                             }).join('')}
