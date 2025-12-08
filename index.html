@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -354,20 +355,343 @@
             font-weight: bold;
             color: #667eea;
         }
+
+        /* AI Feature Styles */
+        .settings-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .settings-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: transform 0.2s;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-content.large {
+            max-width: 900px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .close-btn:hover {
+            color: #e53e3e;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2d3748;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .api-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .api-status.connected {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .api-status.disconnected {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .match-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .match-option {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .match-option:hover {
+            border-color: #667eea;
+        }
+
+        .match-option.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .match-grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+        }
+
+        .match-grid-item:hover {
+            border-color: #667eea;
+        }
+
+        .match-grid-item.selected {
+            border-color: #667eea;
+            background: #ebf4ff;
+        }
+
+        .match-grid-item .p {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .match-grid-item .info {
+            font-size: 0.6rem;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .analysis-result {
+            line-height: 1.8;
+            color: #2d3748;
+        }
+
+        .analysis-result h2 {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin: 20px 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .analysis-result ul,
+        .analysis-result ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .analysis-result li {
+            margin-bottom: 8px;
+        }
+
+        .analysis-result strong {
+            color: #764ba2;
+        }
+
+        .analysis-error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .player-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>🎮</h1>
-        
+
         <div class="controls">
             <button class="refresh-btn" id="refreshBtn" onclick="loadAllProfiles()">Refresh All Profiles</button>
+            <button class="settings-btn" onclick="openSettings()">⚙️ AI Settings</button>
         </div>
 
         <div class="loading" id="loading">Loading profiles...</div>
         <div class="error" id="error"></div>
-        
+
         <div class="profiles-grid" id="profilesGrid"></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeSettings()">&times;</span>
+            <h2 class="modal-title">⚙️ AI Settings</h2>
+            <div class="form-group">
+                <label>Google Gemini API Key:</label>
+                <input type="password" id="apiKeyInput" placeholder="Enter API key...">
+                <p style="font-size:0.8rem;color:#718096;margin-top:8px;">Get free at: <a
+                        href="https://aistudio.google.com/apikey" target="_blank" style="color:#667eea;">Google AI
+                        Studio</a></p>
+            </div>
+            <button class="btn" onclick="saveApiKey()">💾 Save API Key</button>
+            <div id="apiStatus" class="api-status disconnected">❌ No API key</div>
+            <hr style="margin:20px 0;border:none;border-top:2px solid #e2e8f0;">
+            <div class="form-group">
+                <label>AI Model:</label>
+                <button class="btn btn-secondary" onclick="fetchModels()" style="margin-bottom:10px;">🔄 Fetch
+                    Models</button>
+                <select id="modelSelect">
+                    <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                </select>
+            </div>
+            <button class="btn" onclick="saveModel()">💾 Save Model</button>
+        </div>
+    </div>
+
+    <!-- Analysis Modal -->
+    <div class="modal" id="analysisModal">
+        <div class="modal-content large">
+            <span class="close-btn" onclick="closeAnalysis()">&times;</span>
+            <h2 class="modal-title">🧠 AI Analysis</h2>
+            <div id="analysisContent"></div>
+        </div>
     </div>
 
     <script>
@@ -430,7 +754,7 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                
+                profileDataStore[ign.displayName] = data; // Store for AI analysis
                 return { success: true, data, ign };
             } catch (error) {
                 return { success: false, error: error.message, ign };
@@ -441,13 +765,13 @@
             const { data, ign } = profileData;
             const card = document.createElement('div');
             card.className = 'profile-card';
-            
+
             const ignText = data.summoner?.riot_id || ign.displayName || 'N/A';
             const rankText = data.ranked?.rating_text || 'N/A';
             const numGames = data.ranked?.num_games || 0;
             const ratingNumeric = data.ranked?.rating_numeric || 0;
             const peakRating = data.ranked?.peak_rating || 'N/A';
-            
+
             // Generate games history HTML with placement only from matches in first API
             let gamesHistoryHTML = '';
             if (data.matches && data.matches.length > 0) {
@@ -457,24 +781,24 @@
                         <div class="games-history-title">Last 20 Games</div>
                         <div class="games-list">
                             ${last20Matches.map((match) => {
-                                const placement = match.placement;
-                                if (typeof placement !== 'number') return '';
-                                
-                                let placementColor = 'red';
-                                if (placement <= 2) {
-                                    placementColor = 'green';
-                                } else if (placement <= 4) {
-                                    placementColor = 'yellow';
-                                } else if (placement <= 6) {
-                                    placementColor = 'orange';
-                                } else {
-                                    placementColor = 'red';
-                                }
-                                
-                                const date = match.game_datetime ? new Date(match.game_datetime) : null;
-                                const dateStr = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-                                
-                                return `
+                    const placement = match.placement;
+                    if (typeof placement !== 'number') return '';
+
+                    let placementColor = 'red';
+                    if (placement <= 2) {
+                        placementColor = 'green';
+                    } else if (placement <= 4) {
+                        placementColor = 'yellow';
+                    } else if (placement <= 6) {
+                        placementColor = 'orange';
+                    } else {
+                        placementColor = 'red';
+                    }
+
+                    const date = match.game_datetime ? new Date(match.game_datetime) : null;
+                    const dateStr = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+
+                    return `
                                     <div class="game-item">
                                         <div class="game-info">
                                             <div class="placement-block ${placementColor}">
@@ -484,7 +808,7 @@
                                         </div>
                                     </div>
                                 `;
-                            }).join('')}
+                }).join('')}
                         </div>
                     </div>
                 `;
@@ -503,7 +827,7 @@
                 <div class="profile-header">
                     <div class="profile-icon">👤</div>
                     <div class="profile-header-info">
-                        <div class="ign">${ignText}</div>
+                        <div class="ign">${ignText} <button class="analyze-btn" onclick="showAnalysisSetup('${ign.displayName.replace(/'/g, "\\'")}')">🤖 AI</button></div>
                         <div class="rank-value">${rankText}</div>
                         <div class="header-stats">
                             <div class="header-stat">
@@ -542,7 +866,7 @@
         function calculateStats(profiles) {
             const successful = profiles.filter(p => p.success && p.data);
             const total = successful.length;
-            
+
             if (total === 0) {
                 return {
                     totalProfiles: IGN_LIST.length,
@@ -555,18 +879,18 @@
             const ratings = successful
                 .map(p => p.data.ranked?.rating_numeric)
                 .filter(r => r !== undefined && r !== null);
-            
-            const avgRating = ratings.length > 0 
+
+            const avgRating = ratings.length > 0
                 ? Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length)
                 : 0;
 
             const highestRating = Math.max(...ratings, 0);
-            const highestProfile = successful.find(p => 
+            const highestProfile = successful.find(p =>
                 p.data.ranked?.rating_numeric === highestRating
             );
             const highestRank = highestProfile?.data.ranked?.rating_text || '-';
 
-            const totalGames = successful.reduce((sum, p) => 
+            const totalGames = successful.reduce((sum, p) =>
                 sum + (p.data.ranked?.num_games || 0), 0
             );
 
@@ -585,7 +909,7 @@
             const highestRankEl = document.getElementById('highestRank');
             const totalGamesEl = document.getElementById('totalGames');
             const statsSummaryEl = document.getElementById('statsSummary');
-            
+
             if (totalProfilesEl) totalProfilesEl.textContent = stats.totalProfiles;
             if (avgRatingEl) avgRatingEl.textContent = stats.avgRating;
             if (highestRankEl) highestRankEl.textContent = stats.highestRank;
@@ -643,7 +967,256 @@
         }
 
         // Load profiles on page load
-        window.addEventListener('DOMContentLoaded', loadAllProfiles);
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAllProfiles();
+            updateApiStatus();
+        });
+
+        // ============================================
+        // AI ANALYSIS FUNCTIONS
+        // ============================================
+        let profileDataStore = {};
+        let currentPlayer = null;
+        let selectedMatches = [];
+        let analysisMode = 'all';
+
+        const getApiKey = () => localStorage.getItem('gemini_api_key') || '';
+        const getModel = () => localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+            updateApiStatus();
+        }
+        function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+        function openAnalysis() { document.getElementById('analysisModal').classList.add('active'); }
+        function closeAnalysis() {
+            document.getElementById('analysisModal').classList.remove('active');
+            currentPlayer = null;
+            selectedMatches = [];
+        }
+        window.onclick = e => { if (e.target.classList.contains('modal')) e.target.classList.remove('active'); };
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key && !key.startsWith('•')) {
+                localStorage.setItem('gemini_api_key', key);
+                updateApiStatus();
+                alert('✅ Saved!');
+            }
+        }
+        function saveModel() {
+            const m = document.getElementById('modelSelect').value;
+            if (m) { localStorage.setItem('gemini_model', m); alert('✅ Saved: ' + m); }
+        }
+        function updateApiStatus() {
+            const key = getApiKey();
+            const status = document.getElementById('apiStatus');
+            const input = document.getElementById('apiKeyInput');
+            if (key) {
+                status.className = 'api-status connected';
+                status.innerHTML = '✅ Connected';
+                input.value = '••••••••••••';
+            } else {
+                status.className = 'api-status disconnected';
+                status.innerHTML = '❌ No API key';
+            }
+            document.getElementById('modelSelect').value = getModel();
+        }
+        async function fetchModels() {
+            const key = getApiKey();
+            if (!key) return alert('❌ Save API key first!');
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                const data = await res.json();
+                if (data.error) throw new Error(data.error.message);
+                const sel = document.getElementById('modelSelect');
+                sel.innerHTML = '';
+                data.models.filter(m => m.supportedGenerationMethods?.includes('generateContent')).forEach(m => {
+                    const n = m.name.replace('models/', '');
+                    const opt = document.createElement('option');
+                    opt.value = n; opt.textContent = n;
+                    if (n === getModel()) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+                alert('✅ Loaded!');
+            } catch (e) { alert('❌ ' + e.message); }
+        }
+
+        function showAnalysisSetup(displayName) {
+            const data = profileDataStore[displayName];
+            if (!data) return alert('❌ No data! Refresh first.');
+            if (!getApiKey()) { alert('❌ Set API key first!'); return openSettings(); }
+
+            currentPlayer = displayName;
+            selectedMatches = [];
+            analysisMode = 'all';
+
+            const matches = data.matches || [];
+            const name = data.summoner?.riot_id || displayName;
+            const rank = data.ranked?.rating_text || 'Unranked';
+
+            let gridHTML = '';
+            matches.forEach((m, i) => {
+                const p = m.placement;
+                let c = '#e53e3e';
+                if (p <= 2) c = '#38a169'; else if (p <= 4) c = '#d69e2e'; else if (p <= 6) c = '#dd6b20';
+                const d = new Date(m.match_timestamp);
+                gridHTML += `<div class="match-grid-item" data-idx="${i}" onclick="toggleMatch(${i})"><div class="p" style="background:${c}">${p}</div><div class="info">#${i + 1}</div></div>`;
+            });
+
+            document.getElementById('analysisContent').innerHTML = `
+                <div class="player-header"><strong>${name}</strong> - ${rank} (${matches.length} games)</div>
+                <div class="form-group"><label>Model:</label>
+                    <select id="setupModel"><option value="${getModel()}">${getModel()}</option></select>
+                </div>
+                <label style="font-weight:600;">Select matches:</label>
+                <div class="match-options">
+                    <div class="match-option active" onclick="setMode('all',this)">All (max 20)</div>
+                    <div class="match-option" onclick="setMode('top10',this)">Top 10</div>
+                    <div class="match-option" onclick="setMode('select',this)">Select</div>
+                </div>
+                <div id="matchGridWrap" style="display:none;">
+                    <div class="match-grid">${gridHTML}</div>
+                    <p id="selectedCount" style="font-size:0.8rem;color:#667eea;margin-top:8px;">Selected: 0</p>
+                </div>
+                <button class="btn" onclick="startAnalysis()" style="margin-top:20px;">🚀 Start Analysis</button>
+            `;
+            loadSetupModels();
+            openAnalysis();
+        }
+
+        async function loadSetupModels() {
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${getApiKey()}`);
+                const data = await res.json();
+                if (data.models) {
+                    const sel = document.getElementById('setupModel');
+                    sel.innerHTML = '';
+                    data.models.filter(m => m.supportedGenerationMethods?.includes('generateContent')).forEach(m => {
+                        const n = m.name.replace('models/', '');
+                        const opt = document.createElement('option');
+                        opt.value = n; opt.textContent = n;
+                        if (n === getModel()) opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch (e) { }
+        }
+
+        function setMode(mode, el) {
+            analysisMode = mode;
+            selectedMatches = [];
+            document.querySelectorAll('.match-option').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('matchGridWrap').style.display = mode === 'select' ? 'block' : 'none';
+            document.querySelectorAll('.match-grid-item').forEach(e => e.classList.remove('selected'));
+            updateCount();
+        }
+        function toggleMatch(idx) {
+            const el = document.querySelector(`.match-grid-item[data-idx="${idx}"]`);
+            if (selectedMatches.includes(idx)) {
+                selectedMatches = selectedMatches.filter(i => i !== idx);
+                el.classList.remove('selected');
+            } else {
+                selectedMatches.push(idx);
+                el.classList.add('selected');
+            }
+            updateCount();
+        }
+        function updateCount() {
+            const el = document.getElementById('selectedCount');
+            if (el) el.textContent = `Selected: ${selectedMatches.length}`;
+        }
+
+        function getMatchesToAnalyze(data) {
+            const m = data.matches || [];
+            if (analysisMode === 'top10') return m.slice(0, 10);
+            if (analysisMode === 'select') return selectedMatches.map(i => m[i]).filter(Boolean);
+            return m.slice(0, 20);
+        }
+
+        function buildPrompt(data, matches) {
+            const stats = {
+                count: matches.length,
+                top4: matches.filter(m => m.placement <= 4).length,
+                wins: matches.filter(m => m.placement === 1).length,
+                avg: (matches.reduce((a, m) => a + m.placement, 0) / matches.length).toFixed(2)
+            };
+            const matchData = matches.map((m, i) => ({
+                game: i + 1, placement: m.placement,
+                round: m.summary?.last_round, level: m.summary?.level,
+                units: m.summary?.units?.map(u => ({ name: u.character_id.replace('TFT16_', ''), tier: u.tier, items: u.itemNames?.map(x => x.replace('TFT_Item_', '').replace('TFT16_Item_', '')) })),
+                traits: m.summary?.traits?.map(t => t.replace('TFT16_', '').split('_')[0])
+            }));
+            return `Bạn là chuyên gia TFT Challenger, coach có nhiều năm kinh nghiệm.
+
+## THUẬT NGỮ: Econ, Slow roll, Fast 8, Pivot, Cap board, Spike, BIS, Item holder
+
+## PLAYER: ${data.summoner?.riot_id || currentPlayer} (${data.ranked?.rating_text}) - ${data.ranked?.num_games} games
+
+## STATS (${stats.count} games): Top4: ${((stats.top4 / stats.count) * 100).toFixed(1)}%, Avg: ${stats.avg}, Wins: ${stats.wins}
+
+## MATCHES:\n${JSON.stringify(matchData, null, 2)}
+
+## PHÂN TÍCH (giữ nguyên tên champion, item, trait gốc):
+
+## 📊 OVERVIEW\n[Playstyle]
+
+## 🔍 BOT 4 ANALYSIS\n[Vấn đề từng trận 5-8]
+
+## ❌ SAI LẦM CHÍNH\n1. [Cụ thể từ data]\n2. [Khác]
+
+## ✅ ĐIỂM MẠNH
+
+## 📚 KEY TAKEAWAYS\n[Tips actionable]
+
+## 🎯 ROADMAP\n- Target rank\n- Focus
+
+## 💡 COMP RECOMMENDATIONS`;
+        }
+
+        async function callAPI(prompt, model) {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${getApiKey()}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 4096 } })
+            });
+            const data = await res.json();
+            console.log('API Response:', data);
+            if (data.error) throw new Error(data.error.message);
+            if (!data.candidates?.length) throw new Error('No response');
+            const text = data.candidates[0]?.content?.parts?.find(p => p.text)?.text;
+            if (!text) throw new Error('No text');
+            return text;
+        }
+
+        function formatResult(text, name, rank, count) {
+            let html = text.replace(/## (.*)/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n\n/g, '</p><p>').replace(/\n- /g, '</li><li>').replace(/\n(\d+)\. /g, '</li><li>');
+            return `<button class="btn btn-secondary" onclick="showAnalysisSetup('${currentPlayer}')" style="margin-bottom:15px;">← Back</button>
+                <div class="player-header"><strong>${name}</strong> - ${rank} (${count} games analyzed)</div>
+                <div class="analysis-result"><p>${html}</p></div>`;
+        }
+
+        async function startAnalysis() {
+            const data = profileDataStore[currentPlayer];
+            const model = document.getElementById('setupModel')?.value || getModel();
+            const matches = getMatchesToAnalyze(data);
+            if (!matches.length) return alert('❌ Select at least 1 match!');
+
+            const content = document.getElementById('analysisContent');
+            content.innerHTML = `<div style="text-align:center;padding:40px;"><div class="spinner"></div><p>🤖 Analyzing ${matches.length} games...</p><p style="color:#718096;font-size:0.9rem;">Model: ${model}</p></div>`;
+
+            try {
+                const prompt = buildPrompt(data, matches);
+                const result = await callAPI(prompt, model);
+                const name = data.summoner?.riot_id || currentPlayer;
+                const rank = data.ranked?.rating_text || 'Unranked';
+                content.innerHTML = formatResult(result, name, rank, matches.length);
+            } catch (e) {
+                content.innerHTML = `<button class="btn btn-secondary" onclick="showAnalysisSetup('${currentPlayer}')">← Back</button><div class="analysis-error"><h3>❌ Error</h3><p>${e.message}</p></div>`;
+            }
+        }
     </script>
 </body>
+
 </html>
