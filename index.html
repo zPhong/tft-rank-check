@@ -386,6 +386,28 @@
             transform: translateY(-2px);
         }
 
+        .refresh-user-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: transform 0.2s;
+        }
+
+        .refresh-user-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .refresh-user-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -642,7 +664,6 @@
         <h1>🎮</h1>
 
         <div class="controls">
-            <button class="refresh-btn" id="refreshBtn" onclick="loadAllProfiles()">Refresh All Profiles</button>
             <button class="settings-btn" onclick="openSettings()">⚙️ AI Settings</button>
         </div>
 
@@ -746,10 +767,28 @@
             return `https://api.metatft.com/public/profile/lookup_by_riotid/${ign.region}/${ign.gameName}/${ign.tagLine}?source=full_profile&tft_set=TFTSet16`;
         }
 
-        async function fetchProfile(ign) {
-            const apiUrl = buildApiUrl(ign);
+        function buildRefreshApiUrl(ign) {
+            return `https://api.metatft.com/public/profile/refresh_by_riotid/${ign.region}/${ign.gameName}/${ign.tagLine}?tier=1`;
+        }
+
+        async function fetchProfile(ign, useRefresh = false) {
             try {
-                const response = await fetch(apiUrl);
+                let response;
+                if (useRefresh) {
+                    // Use POST refresh API
+                    const apiUrl = buildRefreshApiUrl(ign);
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'accept': 'application/json, text/plain, */*'
+                        }
+                    });
+                } else {
+                    // Use GET lookup API
+                    const apiUrl = buildApiUrl(ign);
+                    response = await fetch(apiUrl);
+                }
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -758,6 +797,54 @@
                 return { success: true, data, ign };
             } catch (error) {
                 return { success: false, error: error.message, ign };
+            }
+        }
+
+        async function refreshUserProfile(ignDisplayName) {
+            const ign = IGN_LIST.find(i => i.displayName === ignDisplayName);
+            if (!ign) return;
+
+            // Find the card and add loading state
+            const cards = document.querySelectorAll('.profile-card');
+            let targetCard = null;
+            cards.forEach(card => {
+                if (card.querySelector('.ign')?.textContent.includes(ignDisplayName.split('#')[0])) {
+                    targetCard = card;
+                }
+            });
+
+            if (targetCard) {
+                targetCard.style.opacity = '0.6';
+                targetCard.style.pointerEvents = 'none';
+            }
+
+            try {
+                const result = await fetchProfile(ign, true); // Use refresh API
+                
+                if (result.success) {
+                    // Replace the card with updated data
+                    const profilesGrid = document.getElementById('profilesGrid');
+                    const newCard = createProfileCard(result);
+                    
+                    // Find and replace the old card
+                    const allCards = Array.from(profilesGrid.children);
+                    const oldCardIndex = allCards.findIndex(card => 
+                        card.querySelector('.ign')?.textContent.includes(ignDisplayName.split('#')[0])
+                    );
+                    
+                    if (oldCardIndex !== -1) {
+                        profilesGrid.replaceChild(newCard, allCards[oldCardIndex]);
+                    }
+                } else {
+                    alert(`Error refreshing ${ignDisplayName}: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error refreshing ${ignDisplayName}: ${error.message}`);
+            } finally {
+                if (targetCard) {
+                    targetCard.style.opacity = '1';
+                    targetCard.style.pointerEvents = 'auto';
+                }
             }
         }
 
@@ -827,7 +914,10 @@
                 <div class="profile-header">
                     <div class="profile-icon">👤</div>
                     <div class="profile-header-info">
-                        <div class="ign">${ignText} <button class="analyze-btn" onclick="showAnalysisSetup('${ign.displayName.replace(/'/g, "\\'")}')">🤖 AI</button></div>
+                        <div class="ign">${ignText} 
+                            <button class="analyze-btn" onclick="showAnalysisSetup('${ign.displayName.replace(/'/g, "\\'")}')">🤖 AI</button>
+                            <button class="refresh-user-btn" onclick="refreshUserProfile('${ign.displayName.replace(/'/g, "\\'")}')" title="Refresh profile">🔄</button>
+                        </div>
                         <div class="rank-value">${rankText}</div>
                         <div class="header-stats">
                             <div class="header-stat">
@@ -921,13 +1011,11 @@
             const loading = document.getElementById('loading');
             const error = document.getElementById('error');
             const profilesGrid = document.getElementById('profilesGrid');
-            const refreshBtn = document.getElementById('refreshBtn');
 
             // Show loading state
             loading.classList.add('active');
             error.classList.remove('active');
             profilesGrid.innerHTML = '';
-            refreshBtn.disabled = true;
 
             try {
                 // Fetch all profiles in parallel
@@ -961,8 +1049,6 @@
                 error.textContent = `Error: ${err.message}`;
                 error.classList.add('active');
                 loading.classList.remove('active');
-            } finally {
-                refreshBtn.disabled = false;
             }
         }
 
