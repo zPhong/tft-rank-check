@@ -1,0 +1,276 @@
+/* ==============================================
+   PROFILE CARD COMPONENTS
+   ============================================== */
+
+/* Profiles Grid */
+.profiles-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 10px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.profiles-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.profiles-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+.profiles-grid::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 4px;
+}
+
+.profiles-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary-dark);
+}
+
+/* Profile Card */
+.profile-card {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    padding: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.profile-card.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Profile Header */
+.profile-header {
+    background: var(--color-gradient);
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-white);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+}
+
+.profile-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-circle);
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.profile-header-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-header-games {
+    flex-shrink: 0;
+    min-width: 200px;
+}
+
+/* IGN & Rank */
+.ign {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rank-value {
+    font-size: 0.85rem;
+    opacity: 0.95;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 3px 10px;
+    border-radius: var(--radius-md);
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+/* Header Stats */
+.header-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.header-stat {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.header-stat-label {
+    opacity: 0.8;
+    margin-right: 4px;
+}
+
+.header-stat-value {
+    font-weight: 600;
+}
+
+/* Profile Body */
+.profile-body {
+    padding: var(--space-md) var(--space-lg);
+}
+
+.rank-details {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 10px;
+    margin-bottom: var(--space-md);
+}
+
+.detail-item {
+    text-align: center;
+    padding: 12px;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+}
+
+.detail-label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.detail-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* Games History */
+.games-history {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.games-history-title {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.games-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: var(--space-xs);
+    padding: 0;
+}
+
+.game-item {
+    display: inline-flex;
+}
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+/* Placement Block */
+.placement-block {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-white);
+    box-shadow: var(--shadow-sm);
+}
+
+.placement-block.green {
+    background: var(--color-success);
+}
+
+.placement-block.yellow {
+    background: var(--color-warning);
+}
+
+.placement-block.orange {
+    background: var(--color-warning-dark);
+}
+
+.placement-block.red {
+    background: var(--color-error);
+}
+
+.game-meta {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-xs);
+}
+
+/* Stats Summary */
+.stats-summary {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-xl);
+    text-align: center;
+}
+
+.stats-grid {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    padding: 10px;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+/* Player Header (for analysis) */
+.player-header {
+    background: var(--color-gradient);
+    color: var(--color-white);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+}

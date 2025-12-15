@@ -1,0 +1,115 @@
+/* ==============================================
+   BUTTON COMPONENTS
+   ============================================== */
+
+/* Base Button */
+.btn {
+    background: var(--color-gradient);
+    color: var(--color-white);
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: transform 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--color-border);
+    color: var(--color-text);
+}
+
+/* Refresh Button */
+.refresh-btn {
+    background: var(--color-white);
+    color: var(--color-primary);
+    border: none;
+    padding: 12px 30px;
+    border-radius: var(--radius-full);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow-md);
+}
+
+.refresh-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.refresh-btn:active {
+    transform: translateY(0);
+}
+
+.refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Settings Button */
+.settings-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: var(--color-white);
+    border: none;
+    padding: 12px 30px;
+    border-radius: var(--radius-full);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow-md);
+}
+
+.settings-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Analyze Button */
+.analyze-btn {
+    background: var(--color-gradient);
+    color: var(--color-white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-xl);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: transform 0.2s;
+}
+
+.analyze-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* History Button */
+.history-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--color-white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-xl);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: transform 0.2s;
+}
+
+.history-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Controls Container */
+.controls {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
