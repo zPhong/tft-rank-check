@@ -31,46 +31,6 @@
             <span class="close-btn" onclick="closeSettings()">&times;</span>
             <h2 class="modal-title">⚙️ Settings</h2>
 
-            <!-- Data Source Section -->
-            <div class="settings-section">
-                <h3 class="section-title">📊 Data Source</h3>
-                <div class="form-group">
-                    <label>Select API Source:</label>
-                    <div class="toggle-group">
-                        <button class="toggle-btn active" id="toggleMetaTFT" onclick="setDataSourceUI('metatft')">
-                            🌐 MetaTFT
-                        </button>
-                        <button class="toggle-btn" id="toggleRiot" onclick="setDataSourceUI('riot')">
-                            🎮 Riot API
-                        </button>
-                    </div>
-                    <p style="font-size:0.75rem;color:#718096;margin-top:8px;">
-                        MetaTFT: No API key needed | Riot: Requires API key
-                    </p>
-                </div>
-            </div>
-
-            <hr style="margin:20px 0;border:none;border-top:2px solid #e2e8f0;">
-
-            <!-- Riot API Section -->
-            <div class="settings-section" id="riotApiSection">
-                <h3 class="section-title">🎮 Riot Games API</h3>
-                <div class="form-group">
-                    <label>Riot API Key:</label>
-                    <input type="password" id="riotApiKeyInput"
-                        placeholder="RGAPI-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
-                    <p style="font-size:0.8rem;color:#718096;margin-top:8px;">
-                        Get free at: <a href="https://developer.riotgames.com" target="_blank"
-                            style="color:#667eea;">Riot Developer Portal</a>
-                        <br><span style="color:#e53e3e;">⚠️ Dev keys expire every 24 hours</span>
-                    </p>
-                </div>
-                <button class="btn" onclick="saveRiotApiKey()">💾 Save Riot API Key</button>
-                <div id="riotApiStatus" class="api-status disconnected">❌ No Riot API key</div>
-            </div>
-
-            <hr style="margin:20px 0;border:none;border-top:2px solid #e2e8f0;">
-
             <!-- Gemini AI Section -->
             <div class="settings-section">
                 <h3 class="section-title">🤖 AI Analysis (Gemini)</h3>

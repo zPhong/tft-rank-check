@@ -1,20 +1,17 @@
 /**
  * Main Application Entry Point
  * Điểm khởi đầu ứng dụng
- * Application entry point
+ * Application entry point (MetaTFT Only)
  */
 
 // Config imports
 import { IGN_LIST } from './config/constants.js';
 import { 
-    getApiKey, setApiKey, getModel, setModel, hasApiKey,
-    getRiotApiKey, setRiotApiKey, hasRiotApiKey,
-    getDataSource, setDataSource, isRiotApiSource
+    getApiKey, setApiKey, getModel, setModel, hasApiKey
 } from './config/settings.js';
 
 // Service imports
 import { fetchProfile, calculateStats } from './services/api.js';
-import { fetchRiotProfile } from './services/riotApi.js';
 import { fetchModels as fetchGeminiModels } from './services/gemini.js';
 
 // Component imports
@@ -28,8 +25,8 @@ import { openMatchHistoryModal, closeMatchHistoryModal } from './components/matc
 // ============================================
 
 /**
- * Load tất cả profiles dựa trên data source
- * Load all profiles based on selected data source
+ * Load tất cả profiles từ MetaTFT
+ * Load all profiles from MetaTFT API
  */
 async function loadAllProfiles() {
     const loading = document.getElementById('loading');
@@ -39,22 +36,14 @@ async function loadAllProfiles() {
 
     // Show loading state
     loading.classList.add('active');
-    loading.textContent = isRiotApiSource() ? 'Loading from Riot API...' : 'Loading from MetaTFT...';
+    loading.textContent = 'Loading from MetaTFT...';
     error.classList.remove('active');
     profilesGrid.innerHTML = '';
     refreshBtn.disabled = true;
 
     try {
-        // Choose fetch function based on data source
-        const fetchFn = isRiotApiSource() ? fetchRiotProfile : fetchProfile;
-        
-        // Check Riot API key if using Riot source
-        if (isRiotApiSource() && !hasRiotApiKey()) {
-            throw new Error('Riot API key not configured. Please add your key in Settings.');
-        }
-        
-        // Fetch all profiles in parallel
-        const profilePromises = IGN_LIST.map(ign => fetchFn(ign));
+        // Fetch all profiles in parallel using MetaTFT API
+        const profilePromises = IGN_LIST.map(ign => fetchProfile(ign));
         const results = await Promise.all(profilePromises);
 
         // Sort by ratingNumeric (highest first)
@@ -113,72 +102,6 @@ function updateApiStatus() {
     }
     
     document.getElementById('modelSelect').value = getModel();
-    
-    // Riot API status
-    updateRiotApiStatus();
-    
-    // Data source toggle
-    updateDataSourceUI();
-}
-
-/**
- * Cập nhật hiển thị trạng thái Riot API
- * Update Riot API status display
- */
-function updateRiotApiStatus() {
-    const riotKey = getRiotApiKey();
-    const riotStatus = document.getElementById('riotApiStatus');
-    const riotInput = document.getElementById('riotApiKeyInput');
-    
-    if (riotStatus) {
-        if (riotKey) {
-            riotStatus.className = 'api-status connected';
-            riotStatus.innerHTML = '✅ Riot API Connected';
-            if (riotInput) riotInput.value = '••••••••••••';
-        } else {
-            riotStatus.className = 'api-status disconnected';
-            riotStatus.innerHTML = '❌ No Riot API key';
-        }
-    }
-}
-
-/**
- * Cập nhật UI cho data source toggle
- * Update data source toggle UI
- */
-function updateDataSourceUI() {
-    const currentSource = getDataSource();
-    const metaTftBtn = document.getElementById('toggleMetaTFT');
-    const riotBtn = document.getElementById('toggleRiot');
-    
-    if (metaTftBtn && riotBtn) {
-        if (currentSource === 'riot') {
-            metaTftBtn.classList.remove('active');
-            riotBtn.classList.add('active');
-        } else {
-            metaTftBtn.classList.add('active');
-            riotBtn.classList.remove('active');
-        }
-    }
-}
-
-/**
- * Set data source và reload profiles
- * Set data source and reload profiles
- * @param {string} source - 'metatft' or 'riot'
- */
-function setDataSourceUI(source) {
-    // Check if Riot API key exists when switching to Riot
-    if (source === 'riot' && !hasRiotApiKey()) {
-        alert('⚠️ Please add your Riot API key first before switching to Riot API.');
-        return;
-    }
-    
-    setDataSource(source);
-    updateDataSourceUI();
-    
-    // Reload profiles with new data source
-    loadAllProfiles();
 }
 
 /**
@@ -191,21 +114,6 @@ function saveApiKey() {
         setApiKey(key);
         updateApiStatus();
         alert('✅ Saved!');
-    }
-}
-
-/**
- * Lưu Riot API key
- * Save Riot API key
- */
-function saveRiotApiKey() {
-    const key = document.getElementById('riotApiKeyInput').value.trim();
-    if (key && !key.startsWith('•')) {
-        setRiotApiKey(key);
-        updateRiotApiStatus();
-        alert('✅ Riot API Key Saved!');
-    } else if (!key) {
-        alert('❌ Please enter a valid Riot API key');
     }
 }
 
@@ -287,10 +195,8 @@ window.openSettings = openSettings;
 window.closeSettings = closeSettings;
 window.closeAnalysis = closeAnalysis;
 window.saveApiKey = saveApiKey;
-window.saveRiotApiKey = saveRiotApiKey;
 window.saveModel = saveModel;
 window.fetchModels = fetchModels;
-window.setDataSourceUI = setDataSourceUI;
 
 // Expose analysis module
 window.analysisModule = analysisModule;
@@ -313,6 +219,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup modal close on outside click
     setupModalCloseOnOutsideClick();
     
-    console.log('TFT Rank Check initialized');
-    console.log('Data Source:', getDataSource());
+    console.log('TFT Rank Check initialized (MetaTFT Only)');
 });

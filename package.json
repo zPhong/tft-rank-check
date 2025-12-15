@@ -1,14 +1,8 @@
 {
-  "name": "tft-rank-check-proxy",
+  "name": "tft-rank-check",
   "version": "1.0.0",
-  "description": "Proxy server for Riot TFT API",
-  "main": "proxy-server.js",
+  "description": "TFT Rank Check - MetaTFT API Only",
   "scripts": {
-    "proxy": "node proxy-server.js",
-    "start": "python3 -m http.server 8888 & node proxy-server.js"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "start": "python3 -m http.server 8888"
   }
 }
