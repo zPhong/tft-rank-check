@@ -819,7 +819,24 @@
             }
 
             try {
-                const result = await fetchProfile(ign, true); // Use refresh API
+                // Step 1: Call refresh API (POST)
+                const refreshUrl = buildRefreshApiUrl(ign);
+                const refreshResponse = await fetch(refreshUrl, {
+                    method: 'POST',
+                    headers: {
+                        'accept': 'application/json, text/plain, */*'
+                    }
+                });
+
+                if (!refreshResponse.ok) {
+                    throw new Error(`Refresh failed: ${refreshResponse.status}`);
+                }
+
+                // Step 2: Wait a bit for the refresh to process, then fetch updated profile
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+
+                // Step 3: Call profile lookup API (GET) to get updated data
+                const result = await fetchProfile(ign, false); // Use lookup API
                 
                 if (result.success) {
                     // Replace the card with updated data
@@ -836,7 +853,7 @@
                         profilesGrid.replaceChild(newCard, allCards[oldCardIndex]);
                     }
                 } else {
-                    alert(`Error refreshing ${ignDisplayName}: ${result.error}`);
+                    alert(`Error fetching updated profile for ${ignDisplayName}: ${result.error}`);
                 }
             } catch (error) {
                 alert(`Error refreshing ${ignDisplayName}: ${error.message}`);
