@@ -25,20 +25,135 @@ function getChampionIcon(characterId) {
 
 /**
  * Get item icon URL from CommunityDragon
- * @param {string} itemName - e.g., "TFT_Item_GargoyleStoneplate"
+ * Supports: standard items, TFT16 emblems, Bilgewater items, Radiant items
+ * @param {string} itemName - e.g., "TFT_Item_GargoyleStoneplate", "TFT16_Item_NoxusEmblemItem"
  * @returns {string} Icon URL
  */
 function getItemIcon(itemName) {
-    // Convert TFT_Item_GargoyleStoneplate -> gargoyle_stoneplate
-    // 1. Remove TFT_Item_ prefix
-    // 2. Convert CamelCase to snake_case
-    // 3. Make lowercase
+    const BASE = `${CDRAGON_BASE}/assets/maps/particles/tft/item_icons`;
+    
+    // Standard item name mapping (verified with CDN - 2024-12-15)
+    const standardItemMap = {
+        'TFT_Item_GargoyleStoneplate': 'gargoyle_stoneplate',
+        'TFT_Item_DragonsClaw': 'dragons_claw',
+        'TFT_Item_GiantSlayer': 'giant_slayer',
+        'TFT_Item_BlueBuff': 'blue_buff',
+        'TFT_Item_BFSword': 'bf_sword',
+        'TFT_Item_ChainVest': 'chain_vest',
+        'TFT_Item_BrambleVest': 'bramble_vest',
+        'TFT_Item_Bloodthirster': 'bloodthirster',
+        'TFT_Item_ArchangelStaff': 'archangel_staff',
+        'TFT_Item_DeathBlade': 'death_blade',
+        'TFT_Item_Deathblade': 'death_blade',
+        'TFT_Item_GiantsBelt': 'gaints_belt',
+        'TFT_Item_ChaliceOfPower': 'chalice_of_power',
+        'TFT_Item_AdaptiveHelm': 'adaptive_helm',
+        'TFT_Item_Crownguard': 'crownguard',
+        'TFT_Item_DeathfireGrasp': 'deathfire_grasp',
+        'TFT_Item_EdgeOfNight': 'edge_of_night_xl',
+        'TFT_Item_Everfrost': 'everfrost_xl',
+        'TFT_Item_NeedlesslyLargeRod': 'needlessly_large_rod',
+        'TFT_Item_RecurveBow': 'recurve_bow',
+        'TFT_Item_SparringGloves': 'sparring_gloves',
+        'TFT_Item_TearOfTheGoddess': 'tear_of_the_goddess',
+        'TFT_Item_NegatronCloak': 'negatron_cloak',
+        'TFT_Item_Quicksilver': 'quicksilver',
+        'TFT_Item_RabadonsDeathcap': 'rabadons_deathcap',
+        'TFT_Item_RunaansHurricane': 'runaans_hurricane',
+        'TFT_Item_SpearOfShojin': 'spear_of_shojin',
+        'TFT_Item_StatikkShiv': 'statikk_shiv',
+        'TFT_Item_SunfireCape': 'sunfire_cape',
+        'TFT_Item_ThiefsGloves': 'thieves_gloves',
+        'TFT_Item_TitansResolve': 'titans_resolve',
+        'TFT_Item_WarmogsArmor': 'warmogs_armor',
+        'TFT_Item_ZekesHerald': 'zekes_herald',
+        'TFT_Item_Zephyr': 'zephyr',
+        'TFT_Item_LastWhisper': 'last_whisper',
+        'TFT_Item_JeweledGauntlet': 'jeweled_guantlet',
+        'TFT_Item_IonicSpark': 'ionic_spark',
+        'TFT_Item_InfinityEdge': 'infinity_edge',
+        'TFT_Item_HextechGunblade': 'hextech_gunblade',
+        'TFT_Item_HandOfJustice': 'hand_of_justice',
+        'TFT_Item_GuinsoosRageblade': 'guinsoos_rageblade',
+        'TFT_Item_Morellonomicon': 'morellonomicon',
+        'TFT_Item_Redemption': 'redemption',
+        'TFT_Item_Shroud': 'shroud_of_stillness',
+        'TFT_Item_Stoneplate': 'gargoyle_stoneplate',
+        'TFT_Item_FrozenHeart': 'frozen_heart',
+        'TFT_Item_SpectralGauntlet': 'jeweled_guantlet',
+        'TFT_Item_PowerGauntlet': 'jeweled_guantlet',
+        'TFT_Item_SteraksGage': 'steraksgage_xl',
+        'TFT_Item_NightHarvester': 'night_harvester',
+        'TFT_Item_UnstableConcoction': 'unstable_concoction',
+        'TFT_Item_GuardianAngel': 'guardian_angel',
+        'TFT_Item_LocketOfTheIronSolari': 'locket_of_the_iron_solari',
+        // Additional items from recent failures
+        'TFT_Item_RapidFireCannon': 'rapidfirecannon_xl',
+        'TFT_Item_RedBuff': 'redbuff',
+        'TFT_Item_MadredsBloodrazor': 'madreds_bloodrazor',
+        'TFT_Item_Fishbones': 'fishbones',
+    };
+    
+    // Check standard item map
+    if (standardItemMap[itemName]) {
+        return `${BASE}/standard/${standardItemMap[itemName]}.png`;
+    }
+    
+    // Handle TFT16 Set 16 Emblems: TFT16_Item_NoxusEmblemItem -> tft16_emblem_noxus.tft_set16.png
+    if (itemName.includes('EmblemItem')) {
+        // Extract trait name: NoxusEmblemItem -> noxus
+        const traitName = itemName
+            .replace(/^TFT16_Item_/, '')
+            .replace('EmblemItem', '')
+            .toLowerCase();
+        return `${BASE}/traits/spatula/set16/tft16_emblem_${traitName}.tft_set16.png`;
+    }
+    
+    // Handle TFT16 specific items (Set 16: Lore & Legends)
+    if (itemName.startsWith('TFT16_')) {
+        // Bilgewater items: TFT16_Item_Bilgewater_CaptainsBrew -> tft16_item_bilgewater_captainsbrew.tft_set16.png
+        if (itemName.includes('Bilgewater_')) {
+            const bilgewaterName = itemName
+                .replace('TFT16_Item_Bilgewater_', '')
+                .toLowerCase();
+            return `${BASE}/tft16/tft16_item_bilgewater_${bilgewaterName}.tft_set16.png`;
+        }
+        
+        // The Darkin items: TFT16_TheDarkinBow -> thedarkinbow (might be in ornn_items)
+        if (itemName.includes('TheDarkin')) {
+            const darkinName = itemName.replace('TFT16_', '').toLowerCase();
+            return `${BASE}/ornn_items/${darkinName}.png`;
+        }
+        
+        // Generic TFT16 items with .tft_set16 suffix
+        const tft16Name = itemName.replace('TFT16_Item_', '').toLowerCase();
+        return `${BASE}/tft16/tft16_item_${tft16Name}.tft_set16.png`;
+    }
+    
+    // Handle Radiant items: TFT5_Item_SteraksGageRadiant -> steraks_gage_radiant.png
+    if (itemName.includes('Radiant')) {
+        const radiantName = itemName
+            .replace(/^TFT\d+_Item_/, '')
+            .replace('Radiant', '')
+            .replace(/([a-z])([A-Z])/g, '$1_$2')
+            .toLowerCase();
+        return `${BASE}/radiant/${radiantName}_radiant.png`;
+    }
+    
+    // Handle Artifact items: TFT_Item_Artifact_LichBane -> tft_item_artifact_lichbane.png
+    if (itemName.includes('Artifact_')) {
+        const artifactName = itemName.toLowerCase().replace('tft_item_artifact_', '');
+        return `${BASE}/ornn_items/tft_item_artifact_${artifactName}.png`;
+    }
+    
+    // Fallback: try standard folder with auto-conversion
     const name = itemName
-        .replace(/^TFT_Item_/, '')
-        .replace(/([A-Z])/g, '_$1')  // Add underscore before capitals
-        .replace(/^_/, '')            // Remove leading underscore
+        .replace(/^TFT\d*_Item_/, '')
+        .replace(/([a-z])([A-Z])/g, '$1_$2')
+        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
         .toLowerCase();
-    return `${CDRAGON_BASE}/assets/maps/particles/tft/item_icons/standard/${name}.png`;
+    
+    return `${BASE}/standard/${name}.png`;
 }
 
 // ============================================
@@ -261,7 +376,8 @@ function createMatchCardHTML(match, lpChange = null) {
                                         <img class="item-icon" 
                                              src="${getItemIcon(item)}" 
                                              alt="${item}"
-                                             onerror="this.style.display='none'">
+                                             title="${item}"
+                                             onerror="this.style.opacity='0.3'; this.style.background='#333'; console.warn('Missing item icon:', '${item}')">
                                     `).join('')}
                                 </div>
                             ` : ''}
