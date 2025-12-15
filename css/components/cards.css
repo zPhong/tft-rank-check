@@ -81,14 +81,28 @@
 }
 
 /* IGN & Rank */
+.profile-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
 .ign {
     font-size: 1.1rem;
     font-weight: 600;
-    margin: 0 0 8px 0;
-    word-break: break-word;
-    white-space: nowrap;
+    max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .rank-value {

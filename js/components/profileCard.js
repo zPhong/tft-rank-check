@@ -69,9 +69,12 @@ export function createProfileCard(profileData) {
         <div class="profile-header">
             <div class="profile-icon">👤</div>
             <div class="profile-header-info">
-                <div class="ign">${ignText} 
-                    <button class="analyze-btn" onclick="window.analysisModule.showAnalysisSetup('${escapedDisplayName}')">🤖 AI</button>
-                    <button class="history-btn" onclick="window.openMatchHistoryModal('${escapedDisplayName}')">📊 History</button>
+                <div class="profile-name-row">
+                    <span class="ign">${ignText}</span>
+                    <div class="action-buttons">
+                        <button class="analyze-btn" onclick="window.analysisModule.showAnalysisSetup('${escapedDisplayName}')">🤖 AI</button>
+                        <button class="history-btn" onclick="window.openMatchHistoryModal('${escapedDisplayName}')">📊 History</button>
+                    </div>
                 </div>
                 <div class="rank-value">${rankText}</div>
                 <div class="header-stats">
