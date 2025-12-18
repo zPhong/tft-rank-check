@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TFT Profiles - IGN & Rank List</title>
+    <link rel="stylesheet" href="css/match-history.css">
     <style>
         * {
             margin: 0;
@@ -386,6 +387,13 @@
             transform: translateY(-2px);
         }
 
+        .profile-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
         .refresh-user-btn {
             background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
             color: white;
@@ -709,6 +717,21 @@
         </div>
     </div>
 
+    <!-- Match History Modal -->
+    <div class="match-modal" id="matchHistoryModal">
+        <div class="match-modal-content">
+            <div class="match-modal-header">
+                <div class="player-info">
+                    <span class="player-name" id="modalPlayerName">Player</span>
+                    <span class="player-rank" id="modalPlayerRank">Rank</span>
+                </div>
+                <button class="match-modal-close" onclick="closeMatchHistory()">&times;</button>
+            </div>
+            <div class="match-stats-summary" id="modalStatsSummary"></div>
+            <div class="match-modal-body" id="modalMatchList"></div>
+        </div>
+    </div>
+
     <script>
         // Hardcoded list of IGNs
         // Format: { region, gameName, tagLine, displayName }
@@ -788,7 +811,7 @@
                     const apiUrl = buildApiUrl(ign);
                     response = await fetch(apiUrl);
                 }
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -844,18 +867,18 @@
 
                 // Step 3: Call profile lookup API (GET) to get updated data
                 const result = await fetchProfile(ign, false); // Use lookup API to get updated profile
-                
+
                 if (result.success) {
                     // Replace the card with updated data
                     const profilesGrid = document.getElementById('profilesGrid');
                     const newCard = createProfileCard(result);
-                    
+
                     // Find and replace the old card
                     const allCards = Array.from(profilesGrid.children);
-                    const oldCardIndex = allCards.findIndex(card => 
+                    const oldCardIndex = allCards.findIndex(card =>
                         card.querySelector('.ign')?.textContent.includes(ignDisplayName.split('#')[0])
                     );
-                    
+
                     if (oldCardIndex !== -1) {
                         profilesGrid.replaceChild(newCard, allCards[oldCardIndex]);
                     }
@@ -942,7 +965,11 @@
                 <div class="profile-header">
                     <div class="profile-icon">👤</div>
                     <div class="profile-header-info">
-                        <div class="ign">${ignText} 
+                        <div class="ign">${ignText}</div>
+                        <div class="profile-actions">
+                            <button class="history-btn" onclick="event.stopPropagation(); openMatchHistory('${ign.displayName.replace(/'/g, "\\'")}')">
+                                📋 History
+                            </button>
                             <button class="analyze-btn" onclick="showAnalysisSetup('${ign.displayName.replace(/'/g, "\\'")}')">🤖 AI</button>
                             <button class="refresh-user-btn" onclick="refreshUserProfile('${ign.displayName.replace(/'/g, "\\'")}')" title="Refresh profile">🔄</button>
                         </div>
@@ -1256,30 +1283,30 @@
                 wins: matches.filter(m => m.placement === 1).length,
                 avg: (matches.reduce((a, m) => a + m.placement, 0) / matches.length).toFixed(2)
             };
-            
+
             // Phân tích chi tiết từng trận với các giai đoạn
             const matchData = matches.map((m, i) => {
-                const units = m.summary?.units?.map(u => ({ 
-                    name: u.character_id.replace('TFT16_', ''), 
-                    tier: u.tier, 
+                const units = m.summary?.units?.map(u => ({
+                    name: u.character_id.replace('TFT16_', ''),
+                    tier: u.tier,
                     star_level: u.tier === 1 ? (u.rarity >= 3 ? 3 : u.rarity >= 2 ? 2 : 1) : 1, // Estimate star level
                     items: u.itemNames?.map(x => x.replace('TFT_Item_', '').replace('TFT16_Item_', '')) || []
                 })) || [];
-                
+
                 // Xác định core champions (thường là tier 3-5 hoặc có items)
                 const coreChamps = units.filter(u => u.tier >= 3 || (u.items && u.items.length >= 2));
                 const itemHolders = units.filter(u => u.items && u.items.length > 0);
-                
+
                 // Phân tích upgrades (2-star, 3-star)
                 const upgradedChamps = units.filter(u => {
                     // Champions có nhiều items thường được upgrade
                     return (u.items && u.items.length >= 2) || u.tier >= 3;
                 });
-                
+
                 // Phân tích giai đoạn early game (champ khởi đầu) - Opener analysis
                 const earlyChamps = units.filter(u => u.tier <= 2);
                 const earlyTraits = m.summary?.traits?.filter(t => t.includes('TFT16_'))?.map(t => t.replace('TFT16_', '').split('_')[0]) || [];
-                
+
                 // Xác định opener type dựa trên early traits và champs
                 let openerType = 'Unknown';
                 if (earlyTraits.includes('Bilgewater') || earlyChamps.some(c => ['Illaoi', 'Graves', 'Twisted Fate', 'Gangplank'].includes(c.name))) {
@@ -1295,23 +1322,23 @@
                 } else if (earlyTraits.includes('Shadow Isles') || earlyChamps.some(c => ['Viego', 'Yorick'].includes(c.name))) {
                     openerType = 'Shadow Isles Opener';
                 }
-                
+
                 // Phân tích upgrade path và timing
                 const upgradeAnalysis = {
-                    upgraded_core: upgradedChamps.map(c => ({ 
-                        name: c.name, 
-                        tier: c.tier, 
+                    upgraded_core: upgradedChamps.map(c => ({
+                        name: c.name,
+                        tier: c.tier,
                         items: c.items,
                         upgrade_priority: c.items && c.items.length >= 2 ? 'High' : 'Medium'
                     })),
                     potential_3_stars: units.filter(u => u.tier <= 2 && u.items && u.items.length > 0).map(c => c.name),
                     upgrade_timing: m.summary?.level <= 7 ? 'Early upgrade' : m.summary?.level <= 8 ? 'Mid upgrade' : 'Late upgrade'
                 };
-                
+
                 return {
-                    game: i + 1, 
+                    game: i + 1,
                     placement: m.placement,
-                    round: m.summary?.last_round, 
+                    round: m.summary?.last_round,
                     level: m.summary?.level,
                     // Opener và champ khởi đầu
                     opener: {
@@ -1342,7 +1369,7 @@
                     }
                 };
             });
-            
+
             return `Bạn là chuyên gia TFT Challenger, coach có nhiều năm kinh nghiệm phân tích gameplay sâu. Tham khảo meta từ TFTFlow.com (https://tftflow.com/) cho Set 16.1.
 
 ## THUẬT NGỮ: Econ, Slow roll, Fast 8, Fast 9, Pivot, Cap board, Spike, BIS, Item holder, Core selection, Transition, Itemization, Opener, Upgrade path
@@ -1493,6 +1520,211 @@ Dựa trên playstyle, điểm mạnh/yếu, và items thường nhận được
             } catch (e) {
                 content.innerHTML = `<button class="btn btn-secondary" onclick="showAnalysisSetup('${currentPlayer}')">← Back</button><div class="analysis-error"><h3>❌ Error</h3><p>${e.message}</p></div>`;
             }
+        }
+
+        // ============================================
+        // MATCH HISTORY MODAL FUNCTIONS
+        // ============================================
+
+        function getChampionIconUrl(characterId) {
+            // Riot Data Dragon CDN - TFT Set 16 format
+            // Format: TFT16_{Name}_splash_centered_0.TFT_Set16.png
+            const version = '15.24.1';
+            const cleanId = characterId.replace('TFT16_', '');
+            const filename = `${characterId}_splash_centered_0.TFT_Set16.png`;
+            return `https://ddragon.leagueoflegends.com/cdn/${version}/img/tft-champion/${filename}`;
+        }
+
+        function getItemIconUrl(itemName) {
+            // Riot Data Dragon CDN for TFT items
+            const version = '15.24.1';
+            // Keep the full item name as Data Dragon uses full TFT_Item names
+            return `https://ddragon.leagueoflegends.com/cdn/${version}/img/tft-item/${itemName}.png`;
+        }
+
+        function getTraitIconUrl(traitName) {
+            // Riot Data Dragon CDN for TFT traits
+            const version = '15.24.1';
+            const traitId = `TFT16_${traitName}`;
+            return `https://ddragon.leagueoflegends.com/cdn/${version}/img/tft-trait/${traitId}.png`;
+        }
+
+        function formatTimeAgo(timestamp) {
+            const diff = Date.now() - timestamp;
+            const mins = Math.floor(diff / 60000);
+            const hrs = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            if (mins < 60) return `${mins} phút trước`;
+            if (hrs < 24) return `${hrs} giờ trước`;
+            if (days < 7) return `${days} ngày trước`;
+            return new Date(timestamp).toLocaleDateString('vi-VN');
+        }
+
+        function openMatchHistory(displayName) {
+            const data = profileDataStore[displayName];
+            if (!data) return alert('Không có dữ liệu! Hãy refresh.');
+
+            const modal = document.getElementById('matchHistoryModal');
+            const name = data.summoner?.riot_id || displayName;
+            const rank = data.ranked?.rating_text || 'Unranked';
+            const matches = data.matches || [];
+
+            document.getElementById('modalPlayerName').textContent = name;
+            document.getElementById('modalPlayerRank').textContent = rank;
+
+            // Render stats summary
+            const top4 = matches.filter(m => m.placement <= 4).length;
+            const wins = matches.filter(m => m.placement === 1).length;
+            const avgPlace = matches.length > 0
+                ? (matches.reduce((a, m) => a + m.placement, 0) / matches.length).toFixed(2)
+                : 0;
+
+            document.getElementById('modalStatsSummary').innerHTML = `
+                <div class="stat-box">
+                    <div class="stat-box-value">${matches.length}</div>
+                    <div class="stat-box-label">Trận Đấu</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value">${wins}</div>
+                    <div class="stat-box-label">Chiến Thắng</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value">${top4}</div>
+                    <div class="stat-box-label">Top 4</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-value">${avgPlace}</div>
+                    <div class="stat-box-label">TB Xếp Hạng</div>
+                </div>
+            `;
+
+            // Render match list
+            const currentRating = data.ranked?.rating_numeric || 0;
+            document.getElementById('modalMatchList').innerHTML = `
+                <div class="match-list-modal">
+                    ${matches.slice(0, 20).map((m, i) => renderMatchCardModal(m, i, currentRating)).join('')}
+                </div>
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMatchHistory() {
+            document.getElementById('matchHistoryModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('matchHistoryModal')?.addEventListener('click', (e) => {
+            if (e.target.classList.contains('match-modal')) closeMatchHistory();
+        });
+
+        function renderTraitPill(traitStr) {
+            const parts = traitStr.replace('TFT16_', '').split('_');
+            const name = parts[0];
+            const level = parseInt(parts[1] || '1');
+            let tierClass = '';
+            if (level >= 4) tierClass = 'gold';
+            else if (level >= 3) tierClass = 'silver';
+            else if (level >= 2) tierClass = 'bronze';
+            return `<span class="trait-pill ${tierClass}">
+                <img src="${getTraitIconUrl(name)}" class="trait-icon" onerror="this.style.display='none'">
+                ${name}
+            </span>`;
+        }
+
+        function renderUnitCard(unit) {
+            const charId = unit.character_id.replace('TFT16_', '');
+            const tier = unit.tier || 1;
+            const items = unit.itemNames || [];
+
+            return `
+                <div class="unit-card">
+                    <div class="unit-portrait">
+                        <img src="${getChampionIconUrl(unit.character_id)}" 
+                             class="unit-img tier-${tier}" 
+                             alt="${charId}"
+                             onerror="this.src='https://ddragon.leagueoflegends.com/cdn/14.24.1/img/profileicon/29.png'">
+                        <div class="unit-stars">
+                            ${Array(Math.min(tier, 3)).fill('<span class="star">⭐</span>').join('')}
+                        </div>
+                    </div>
+                    <div class="unit-name">${charId}</div>
+                    <div class="unit-items-row">
+                        ${items.slice(0, 3).map(item => `
+                            <img src="${getItemIconUrl(item)}" 
+                                 class="item-img" 
+                                 title="${item.replace('TFT_Item_', '').replace('TFT16_Item_', '')}"
+                                 onerror="this.style.display='none'">
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMatchCardModal(match, index, currentRating) {
+            const placement = match.placement;
+            const summary = match.summary || {};
+            const units = summary.units || [];
+            const traits = summary.traits || [];
+            const timeAgo = formatTimeAgo(match.match_timestamp);
+            const level = summary.level || '?';
+            const lastRound = summary.last_round || '?';
+            const damage = summary.total_damage_to_players || 0;
+            const eliminated = summary.players_eliminated || 0;
+
+            const durationMins = Math.floor((lastRound * 50) / 60);
+            const durationSecs = (lastRound * 50) % 60;
+            const duration = `${durationMins}:${String(durationSecs).padStart(2, '0')}`;
+
+            // LP estimate
+            let lpHtml = '';
+            if (placement <= 4) {
+                const gain = Math.floor((5 - placement) * 12);
+                lpHtml = `<span class="match-lp-modal positive">+${gain} LP</span>`;
+            } else {
+                const loss = Math.floor((placement - 4) * 12);
+                lpHtml = `<span class="match-lp-modal negative">-${loss} LP</span>`;
+            }
+
+            const activeTraits = traits.filter(t => {
+                const parts = t.split('_');
+                return parseInt(parts[parts.length - 1]) >= 2;
+            }).slice(0, 4);
+
+            return `
+                <div class="match-card-modal" onclick="this.classList.toggle('expanded')">
+                    <div class="match-row">
+                        <div class="placement-badge-modal p-${placement}">${placement}</div>
+                        <div class="match-info-modal">
+                            <div class="match-info-top">
+                                <span class="match-time-modal">${timeAgo}</span>
+                                <span class="match-duration-modal">${duration} • Lv${level}</span>
+                                ${lpHtml}
+                            </div>
+                            <div class="match-stats-row">
+                                <span class="match-stat-modal">
+                                    <span class="icon">🗡️</span>
+                                    <span class="value">${damage}</span> dmg
+                                </span>
+                                <span class="match-stat-modal">
+                                    <span class="icon">☠️</span>
+                                    <span class="value">${eliminated}</span> kills
+                                </span>
+                            </div>
+                        </div>
+                        <div class="match-traits-row">
+                            ${activeTraits.map(t => renderTraitPill(t)).join('')}
+                        </div>
+                    </div>
+                    <div class="match-details-modal">
+                        <div class="units-grid-modal">
+                            ${units.map(u => renderUnitCard(u)).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
         }
     </script>
 </body>
