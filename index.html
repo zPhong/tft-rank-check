@@ -1542,11 +1542,100 @@ Dựa trên playstyle, điểm mạnh/yếu, và items thường nhận được
             return `https://ddragon.leagueoflegends.com/cdn/${version}/img/tft-item/${itemName}.png`;
         }
 
+        // Data Dragon CDN for TFT Set 16 trait icons
+        // Mapping based on official tft-trait.json v15.24.1
+        const TFT16_TRAIT_ICONS = {
+            // Regions
+            'bilgewater': 'Trait_Icon_9_Bilgewater.png',
+            'demacia': 'Trait_Icon_16_Demacia.TFT_Set16.png',
+            'freljord': 'Trait_Icon_16_Freljord.TFT_Set16.png',
+            'ionia': 'Trait_Icon_16_Ionia.TFT_Set16.png',
+            'ixtal': 'Trait_Icon_16_Ixtal.TFT_Set16.png',
+            'explorer': 'Trait_Icon_16_Ixtal.TFT_Set16.png', // Explorer = Ixtal
+            'noxus': 'Trait_Icon_16_Noxus.TFT_Set16.png',
+            'piltover': 'Trait_Icon_16_Piltover.TFT_Set16.png',
+            'shadowisles': 'Trait_Icon_16_ShadowIsles.TFT_Set16.png',
+            'shurima': 'Trait_Icon_16_Shurima.TFT_Set16.png',
+            'targon': 'Trait_Icon_16_Targon.TFT_Set16.png',
+            'void': 'Trait_Icon_16_Void.TFT_Set16.png',
+            'zaun': 'Trait_Icon_16_Zaun.TFT_Set16.png',
+            'yordle': 'Trait_Icon_16_Yordle.TFT_Set16.png',
+
+            // Classes (API name -> Data Dragon icon)
+            'brawler': 'Trait_Icon_16_Bruiser.TFT_Set16.png', // Brawler = Bruiser
+            'bruiser': 'Trait_Icon_16_Bruiser.TFT_Set16.png',
+            'defender': 'Trait_Icon_16_Defender.png',
+            'gunslinger': 'Trait_Icon_16_Gunslinger.TFT_Set16.png',
+            'invoker': 'Trait_Icon_16_Invoker.png',
+            'juggernaut': 'Trait_Icon_16_Juggernaut.png',
+            'longshot': 'Trait_Icon_16_Longshot.TFT_Set16.png',
+            'rapidfire': 'Trait_Icon_16_Quickstriker.png', // Rapidfire = Quickstriker
+            'quickstriker': 'Trait_Icon_16_Quickstriker.png',
+            'slayer': 'Trait_Icon_16_Slayer.png',
+            'sorcerer': 'Trait_Icon_6_Arcanist.png', // Sorcerer = Arcanist
+            'arcanist': 'Trait_Icon_6_Arcanist.png',
+            'vanquisher': 'Trait_Icon_16_Vanquisher.png',
+            'magus': 'Trait_Icon_16_Disruptor.png', // Magus = Disruptor
+            'disruptor': 'Trait_Icon_16_Disruptor.png',
+            'warden': 'Trait_Icon_16_Warden.TFT_Set16.png',
+            'runemage': 'Trait_Icon_16_RuneMage.TFT_Set16.png',
+            'harvester': 'Trait_Icon_16_Harvester.TFT_Set16.png',
+
+            // Unique traits (champion-specific)
+            'darkchild': 'Trait_Icon_16_DarkChild.TFT_Set16.png',
+            'blacksmith': 'Trait_Icon_16_Blacksmith.TFT_Set16.png',
+            'emperor': 'Trait_Icon_16_Emperor.TFT_Set16.png',
+            'chronokeeper': 'Trait_Icon_16_Chronokeeper.TFT_Set16.png',
+            'soulbound': 'Trait_Icon_16_Soulbound.TFT_Set16.png',
+            'heroic': 'Trait_Icon_16_Heroic.TFT_Set16.png',
+            'glutton': 'Trait_Icon_16_Glutton.TFT_Set16.png',
+            'theboss': 'Trait_Icon_4_Theboss.png',
+            'aatroxunique': 'Trait_Icon_9_Darkin.png', // World Ender
+            'kaisaunique': 'Trait_Icon_16_Assimilator.TFT_Set16.png',
+            'assimilator': 'Trait_Icon_16_Assimilator.TFT_Set16.png',
+            'huntress': 'Trait_Icon_16_Huntress.TFT_Set16.png',
+            'sylastrait': 'Trait_Icon_16_Chainbreaker.TFT_Set16.png',
+            'chainbreaker': 'Trait_Icon_16_Chainbreaker.TFT_Set16.png',
+            'caretaker': 'Trait_Icon_16_Caretaker.TFT_Set16.png',
+            'xerathunique': 'Trait_Icon_12_Ascendant.TFT_Set12.png', // Ascendant
+            'ascendant': 'Trait_Icon_12_Ascendant.TFT_Set12.png',
+            'kindredunique': 'Trait_Icon_5_Eternal.png', // Eternal
+            'eternal': 'Trait_Icon_5_Eternal.png',
+            'shyvanaunique': 'Trait_Icon_16_Dragonborn.TFT_Set16.png', // Dragonborn
+            'dragonborn': 'Trait_Icon_16_Dragonborn.TFT_Set16.png',
+            'baronunique': 'Trait_Icon_16_Riftscourge.png', // Riftscourge
+            'riftscourge': 'Trait_Icon_16_Riftscourge.png',
+            'hexmech': 'Trait_Icon_16_Hexmech.TFT_Set16.png',
+            'zaahentrait': 'Trait_Icon_16_Immortal.TFT_Set16.png', // Immortal
+            'immortal': 'Trait_Icon_16_Immortal.TFT_Set16.png',
+            'aurelionsolunique': 'Trait_Icon_16_StarForger.TFT_Set16.png', // Star Forger
+            'starforger': 'Trait_Icon_16_StarForger.TFT_Set16.png',
+            'darkinweapon': 'Trait_Icon_16_Darkin.TFT_Set16.png',
+            'darkin': 'Trait_Icon_16_Darkin.TFT_Set16.png',
+        };
+
         function getTraitIconUrl(traitName) {
-            // Riot Data Dragon CDN for TFT traits
-            const version = '15.24.1';
-            const traitId = `TFT16_${traitName}`;
-            return `https://ddragon.leagueoflegends.com/cdn/${version}/img/tft-trait/${traitId}.png`;
+            const name = traitName.toLowerCase().replace(/\s+/g, '');
+            const iconFile = TFT16_TRAIT_ICONS[name];
+
+            if (iconFile) {
+                return `https://ddragon.leagueoflegends.com/cdn/15.24.1/img/tft-trait/${iconFile}`;
+            }
+
+            // Fallback: try Community Dragon PBE
+            return `https://raw.communitydragon.org/pbe/game/assets/ux/traiticons/trait_icon_16_${name}.tft_set16.png`;
+        }
+
+        // Fallback URL: try without .tft_set16 suffix
+        function getTraitIconUrlFallback(traitName) {
+            const name = traitName.toLowerCase().replace(/\s+/g, '');
+            return `https://raw.communitydragon.org/pbe/game/assets/ux/traiticons/trait_icon_16_${name}.png`;
+        }
+
+        // Second fallback: try older set icons
+        function getTraitIconUrlFallback2(traitName) {
+            const name = traitName.toLowerCase().replace(/\s+/g, '');
+            return `https://raw.communitydragon.org/pbe/game/assets/ux/traiticons/trait_icon_9_${name}.png`;
         }
 
         function formatTimeAgo(timestamp) {
@@ -1623,15 +1712,27 @@ Dựa trên playstyle, điểm mạnh/yếu, và items thường nhận được
         function renderTraitPill(traitStr) {
             const parts = traitStr.replace('TFT16_', '').split('_');
             const name = parts[0];
-            const level = parseInt(parts[1] || '1');
-            let tierClass = '';
-            if (level >= 4) tierClass = 'gold';
-            else if (level >= 3) tierClass = 'silver';
-            else if (level >= 2) tierClass = 'bronze';
-            return `<span class="trait-pill ${tierClass}">
-                <img src="${getTraitIconUrl(name)}" class="trait-icon" onerror="this.style.display='none'">
-                ${name}
-            </span>`;
+            const count = parseInt(parts[1] || '1');
+
+            // Determine tier based on typical TFT breakpoints
+            let tierClass = 'tier-inactive';
+            if (count >= 6) tierClass = 'tier-gold';
+            else if (count >= 4) tierClass = 'tier-silver';
+            else if (count >= 2) tierClass = 'tier-bronze';
+            else if (count >= 1) tierClass = 'tier-active';
+
+            const primaryUrl = getTraitIconUrl(name);
+            const fallbackUrl = getTraitIconUrlFallback(name);
+            const fallbackUrl2 = getTraitIconUrlFallback2(name);
+
+            return `<div class="trait-box ${tierClass}" title="${name}">
+                <span class="trait-count">${count}</span>
+                <img src="${primaryUrl}" 
+                     class="trait-icon" 
+                     onerror="this.onerror=null; this.src='${fallbackUrl}'; this.onerror=function(){this.src='${fallbackUrl2}'; this.onerror=function(){this.style.display='none'; this.nextElementSibling.style.display='flex';}}"
+                     alt="${name}">
+                <span class="trait-fallback" style="display:none; width:18px; height:18px; background:#555; border-radius:3px; font-size:9px; font-weight:bold; color:#fff; align-items:center; justify-content:center;">${name.substring(0, 2).toUpperCase()}</span>
+            </div>`;
         }
 
         function renderUnitCard(unit) {
@@ -1668,6 +1769,8 @@ Dựa trên playstyle, điểm mạnh/yếu, và items thường nhận được
             const summary = match.summary || {};
             const units = summary.units || [];
             const traits = summary.traits || [];
+
+
             const timeAgo = formatTimeAgo(match.match_timestamp);
             const level = summary.level || '?';
             const lastRound = summary.last_round || '?';
@@ -1688,10 +1791,11 @@ Dựa trên playstyle, điểm mạnh/yếu, và items thường nhận được
                 lpHtml = `<span class="match-lp-modal negative">-${loss} LP</span>`;
             }
 
+            // Show all active traits (level >= 1 means trait is active)
             const activeTraits = traits.filter(t => {
                 const parts = t.split('_');
-                return parseInt(parts[parts.length - 1]) >= 2;
-            }).slice(0, 4);
+                return parseInt(parts[parts.length - 1]) >= 1;
+            });
 
             return `
                 <div class="match-card-modal" onclick="this.classList.toggle('expanded')">

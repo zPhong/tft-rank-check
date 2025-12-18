@@ -336,48 +336,121 @@
     color: rgba(255, 255, 255, 0.85);
 }
 
-/* Traits in Row */
+/* Traits in Row - Horizontal scroll for all traits */
 .match-traits-row {
     display: flex;
     gap: 6px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     margin-left: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 350px;
+    padding: 4px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
 }
 
-.trait-pill {
+.match-traits-row::-webkit-scrollbar {
+    height: 4px;
+}
+
+.match-traits-row::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.match-traits-row::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5);
+    border-radius: 2px;
+}
+
+.match-traits-row::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.7);
+}
+
+/* Trait Box - TFT Style with count and icon */
+.trait-box {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: white;
-    background: rgba(99, 102, 241, 0.3);
-    border: 1px solid rgba(99, 102, 241, 0.4);
+    gap: 2px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: rgba(30, 30, 40, 0.9);
+    border: 1px solid rgba(80, 80, 100, 0.6);
+    flex-shrink: 0;
 }
 
-.trait-pill.gold {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 140, 0, 0.3));
-    border-color: rgba(255, 215, 0, 0.5);
-}
-
-.trait-pill.silver {
-    background: linear-gradient(135deg, rgba(192, 192, 192, 0.3), rgba(138, 138, 138, 0.3));
-    border-color: rgba(192, 192, 192, 0.4);
-}
-
-.trait-pill.bronze {
-    background: linear-gradient(135deg, rgba(205, 127, 50, 0.3), rgba(139, 69, 19, 0.3));
-    border-color: rgba(205, 127, 50, 0.4);
+.trait-count {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #888;
+    min-width: 12px;
+    text-align: center;
 }
 
 .trait-icon {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-    vertical-align: middle;
-    margin-right: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 2px;
+    object-fit: contain;
+    filter: grayscale(30%);
+}
+
+/* Tier styling based on breakpoints */
+.trait-box.tier-inactive {
+    opacity: 0.5;
+}
+
+.trait-box.tier-inactive .trait-icon {
+    filter: grayscale(100%);
+}
+
+.trait-box.tier-active {
+    border-color: rgba(100, 100, 120, 0.8);
+}
+
+.trait-box.tier-active .trait-count {
+    color: #aaa;
+}
+
+.trait-box.tier-bronze {
+    border-color: #cd7f32;
+    background: linear-gradient(135deg, rgba(139, 90, 43, 0.4), rgba(30, 30, 40, 0.9));
+}
+
+.trait-box.tier-bronze .trait-count {
+    color: #cd7f32;
+}
+
+.trait-box.tier-bronze .trait-icon {
+    filter: none;
+}
+
+.trait-box.tier-silver {
+    border-color: #c0c0c0;
+    background: linear-gradient(135deg, rgba(150, 150, 160, 0.3), rgba(30, 30, 40, 0.9));
+}
+
+.trait-box.tier-silver .trait-count {
+    color: #c0c0c0;
+}
+
+.trait-box.tier-silver .trait-icon {
+    filter: none;
+}
+
+.trait-box.tier-gold {
+    border-color: #ffd700;
+    background: linear-gradient(135deg, rgba(180, 140, 20, 0.4), rgba(30, 30, 40, 0.9));
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+.trait-box.tier-gold .trait-count {
+    color: #ffd700;
+    text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
+}
+
+.trait-box.tier-gold .trait-icon {
+    filter: none;
 }
 
 /* ===== MATCH DETAILS EXPANDED ===== */
